@@ -23,6 +23,7 @@ Install tests use disposable directories, including a prefix containing spaces.
 | Offline | No network for tips/offline, explicit empty-news failure, corrupt-cache failure |
 | Rendering | Control/ANSI/OSC stripping, markup decoding, safe URLs, output-writer failures |
 | Installation | Standalone PATH command, custom/spaced prefix, DESTDIR staging, no setup on help, onboarding and count/error options |
+| Greetings | All hour boundaries, device timezone, sanitized name, three-comment rotation and wrap, persisted visits across App instances, legacy-cache compatibility |
 
 ## Manual acceptance
 

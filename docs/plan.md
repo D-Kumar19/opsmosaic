@@ -73,3 +73,13 @@ T006 follows T005; T007 follows T006; T008 follows T007.
   tests/vet; install the standalone command locally.
 - T011 depends on T006; T010 documents T011; T012 depends on T010/T011.
 - Homebrew tap publication remains a release task, not an existing service.
+
+## Follow-up: personalized greetings (2026-10-14)
+
+- [x] T013 (REQ-001): Add emoji morning/afternoon/evening/night-owl greetings
+  and three rotating comments for each local-time period. Persist successful
+  greeting visits with backward-compatible cache state.
+- [x] T014 (REQ-008): Test hour boundaries, local timezone, sanitization,
+  persisted rotation, legacy caches, installation and existing CLI behavior.
+- T013 depends on T006; T014 depends on T013. Document the greeting periods
+  and reinstall the verified standalone executable.

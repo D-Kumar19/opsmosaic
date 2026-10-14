@@ -115,7 +115,33 @@ Choose your interests:
 Topic numbers (comma-separated, e.g. 1,2,3): 2,3,4,9
 ```
 
-Later runs greet you with your name, local date/time and timezone. By default,
+Runs greet you with your name, local date/time and timezone, plus a small
+time-aware comment. For example:
+
+```text
++-- OpsMosaic ✨ ------------------------------------------------+
+  ☀️ Good morning, <YOUR NAME>!
+  ☕ Need a coffee? Here's a little signal to start your day.
+  🕒 Wednesday, 14 October 2026 | 09:00 CEST
++---------------------------------------------------------------+
+```
+
+Greetings follow your device's local time:
+
+| Hours | Greeting |
+|---|---|
+| 05:00-11:59 | ☀️ Good morning |
+| 12:00-16:59 | 🌤️ Good afternoon |
+| 17:00-21:59 | 🌆 Good evening |
+| 22:00-04:59 | 🦉 Hey night owl |
+
+Each period has three playful comments that rotate on successful briefings.
+The rotation persists locally, including in tips-only and offline modes.
+Older caches work without resetting your profile. No AI service generates
+these messages, and failed displays do not advance the rotation.
+Emoji appearance depends on your terminal's font support.
+
+By default,
 each run shows **one random item**: a tip, news headline, or release matching
 your interests. The app prefers unseen items, randomly chooses an available
 content kind, then randomly chooses an item within that kind. This keeps busy
@@ -229,6 +255,6 @@ See [test cases](docs/testing.md), [project context](docs/spec.md),
 [architecture](docs/architecture.md), [principles](docs/constitution.md),
 and [implementation TODOs](docs/plan.md).
 
-The first version uses an SSH-friendly numbered picker and plain ASCII
-output. A full-screen picker, color, custom feeds and release packaging are
+The first version uses an SSH-friendly numbered picker with emoji greetings
+and no ANSI color escapes. A full-screen picker, color, custom feeds and release packaging are
 tracked in the backlog.

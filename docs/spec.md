@@ -9,6 +9,9 @@ read: a practical tip, relevant news, and project releases with original links.
 - REQ-001: Ask for a name and multiple interests on first run. Persist locally;
   subsequent runs welcome the user back with local date, time, and timezone.
   `config` repeats onboarding without destroying an existing profile on error.
+  Use emoji greetings based on local hour (morning 05-11, afternoon 12-16,
+  evening 17-21, night owl 22-04) with three rotating comments per period.
+  Persist rotation after successful displays; accept older caches.
 - REQ-002: Support Docker, Kubernetes, AWS, Security, Helm, Argo CD, Kargo,
   Crossplane, and AI. Validate selections and `--topic` overrides.
 - REQ-003: Ship reviewed, read-only tips with documentation links for every

@@ -32,7 +32,7 @@ grep -q 'default 1' output.txt
 test ! -e "$OPSMOSAIC_HOME/config.json"
 
 printf 'Alex\n3,5\n' | opsmosaic --tips > output.txt
-grep -q 'Welcome back, Alex!' output.txt
+grep -q ', Alex!' output.txt
 grep -q 'Showing 1 items' output.txt
 opsmosaic --tips --count 3 > output.txt
 grep -q 'Showing 3 items' output.txt

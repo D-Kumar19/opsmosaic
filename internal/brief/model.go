@@ -90,9 +90,10 @@ type SourceCache struct {
 }
 
 type Cache struct {
-	Version int                    `json:"version"`
-	Sources map[string]SourceCache `json:"sources"`
-	Recent  []string               `json:"recent"`
+	Version        int                    `json:"version"`
+	Sources        map[string]SourceCache `json:"sources"`
+	Recent         []string               `json:"recent"`
+	GreetingVisits uint64                 `json:"greeting_visits,omitempty"`
 }
 
 func selectItems(items []Item, topics, recent []string, count int) []Item {

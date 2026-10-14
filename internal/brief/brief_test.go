@@ -241,7 +241,7 @@ func TestCLIOnboardingAndReturn(t *testing.T) {
 		t.Fatalf("first run: %s, %v", out, err)
 	}
 	out, _, err = runApp(a, []string{"--tips"}, "")
-	if err != nil || !strings.Contains(out, "Welcome back, Dheeraj!") || !strings.Contains(out, "21:14 UTC") {
+	if err != nil || !strings.Contains(out, "Good evening, Dheeraj!") || !strings.Contains(out, "21:14 UTC") {
 		t.Fatalf("return: %s, %v", out, err)
 	}
 }
@@ -380,13 +380,13 @@ func (failedWriter) Write([]byte) (int, error) {
 func TestRenderSafetyAndWriteError(t *testing.T) {
 	item := Item{Kind: "news", Topic: "aws", Title: "\x1b[31mTitle\x1b[0m", Source: "\x1b]0;bad\aSource", URL: "javascript:alert(1)"}
 	var out bytes.Buffer
-	if err := render(&out, "Name", []string{"aws"}, []Item{item}, time.Now()); err != nil {
+	if err := render(&out, "Name", []string{"aws"}, []Item{item}, time.Now(), 0); err != nil {
 		t.Fatal(err)
 	}
 	if strings.ContainsAny(out.String(), "\x1b\a") || strings.Contains(out.String(), "javascript:") {
 		t.Fatalf("unsafe terminal rendering: %q", out.String())
 	}
-	if err := render(failedWriter{}, "Name", nil, nil, time.Now()); err == nil {
+	if err := render(failedWriter{}, "Name", nil, nil, time.Now(), 0); err == nil {
 		t.Fatal("output errors must propagate")
 	}
 }

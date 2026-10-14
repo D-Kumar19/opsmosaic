@@ -3,8 +3,8 @@ metadata:
   source_tasks: docs/plan.md
   last_updated: "2026-10-14"
 summary:
-  total_tasks: 12
-  completed_tasks: 12
+  total_tasks: 14
+  completed_tasks: 14
   in_progress_tasks: 0
   pending_tasks: 0
   completion_percentage: 100
@@ -99,10 +99,26 @@ tasks:
       test_results: {command: "go test -race ./...", passed: 60, failed: 0, skipped: 0, failures: []}
       notes: make test-install and vet passed; user-local executable resolved on PATH outside the checkout.
     upstream_trace: {plan_item: Follow-up portable installation, requirements: [REQ-008]}
+  - task_id: T013
+    description: Add local-time emoji greetings and persisted comment rotation
+    status: completed
+    implementation:
+      files_changed: [internal/brief/greeting.go, internal/brief/app.go, internal/brief/model.go, README.md, docs/spec.md, docs/architecture.md]
+    upstream_trace: {plan_item: Follow-up personalized greetings, requirements: [REQ-001]}
+  - task_id: T014
+    description: Verify greetings and reinstall standalone command
+    status: completed
+    implementation:
+      files_changed: [internal/brief/greeting_test.go, internal/brief/brief_test.go, scripts/test-install.sh, docs/testing.md, docs/plan.md]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race -cover ./...", passed: 64, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 93.8%; vet, installation tests and user-local reinstall passed.
+    upstream_trace: {plan_item: Follow-up personalized greetings, requirements: [REQ-008]}
 pending_tasks: []
 untracked_changes: []
 traceability_chain:
-  - {requirement: REQ-001, tasks: [T002, T003, T006], status: complete}
+  - {requirement: REQ-001, tasks: [T002, T003, T006, T013], status: complete}
   - {requirement: REQ-002, tasks: [T002, T003, T006], status: complete}
   - {requirement: REQ-003, tasks: [T002, T004], status: complete}
   - {requirement: REQ-004, tasks: [T002, T004, T005], status: complete}

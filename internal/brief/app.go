@@ -153,10 +153,11 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if err := render(out, profile.Name, topics, chosen, now); err != nil {
+	if err := render(out, profile.Name, topics, chosen, now, cache.GreetingVisits); err != nil {
 		return err
 	}
 	cache.Recent = remember(cache.Recent, chosen)
+	cache.GreetingVisits++
 	return writeJSON(a.Store.CachePath, cache)
 }
 
@@ -214,11 +215,12 @@ func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.
 	return items, notes
 }
 
-func render(out io.Writer, name string, topics []string, items []Item, now time.Time) error {
+func render(out io.Writer, name string, topics []string, items []Item, now time.Time, visit uint64) error {
 	var b strings.Builder
-	b.WriteString("\n+-- OpsMosaic --------------------------------------------------+\n")
-	fmt.Fprintf(&b, "  Welcome back, %s!\n", cleanText(name))
-	fmt.Fprintf(&b, "  %s\n", now.Format("Monday, 02 January 2006 | 15:04 MST"))
+	b.WriteString("\n+-- OpsMosaic ✨ ------------------------------------------------+\n")
+	title, comment := greeting(name, now, visit)
+	fmt.Fprintf(&b, "  %s\n  %s\n", title, comment)
+	fmt.Fprintf(&b, "  🕒 %s\n", now.Format("Monday, 02 January 2006 | 15:04 MST"))
 	b.WriteString("+---------------------------------------------------------------+\n")
 	for _, item := range items {
 		fmt.Fprintf(&b, "\n%s | %s\n", strings.ToUpper(cleanText(item.Kind)), cleanText(topicName(item.Topic)))

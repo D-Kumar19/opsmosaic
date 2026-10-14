@@ -28,7 +28,10 @@ and an explicit news empty state.
 - Item: stable ID, kind, topic, title, source, URL, optional command and
   publication timestamp. Cached status is presentation metadata.
 - Source cache: last successful fetch timestamp and normalized items.
-- Cache: schema version, source-ID map, last 100 displayed IDs.
+- Cache: schema version, source-ID map, last 100 displayed IDs, optional
+  `greeting_visits` counter (zero for older caches). Greeting period uses the
+  local hour; counter modulo three picks the comment. Advance after rendering
+  succeeds and atomically save with history.
 
 Config: OS user-config directory / opsmosaic / config.json.
 Cache: OS user-cache directory / opsmosaic / cache.json.

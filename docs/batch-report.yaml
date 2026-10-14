@@ -141,3 +141,20 @@ installation_follow_up:
     standalone_path_lookup: passed
     homebrew_tap_published: false
     personal_profile_modified: false
+greeting_follow_up:
+  batch_id: B04
+  date: "2026-10-14"
+  completed_tasks: [T013, T014]
+  blocked_tasks: []
+  traceability:
+    - {requirement: REQ-001, task: T013, files: [internal/brief/greeting.go, internal/brief/app.go, internal/brief/model.go], status: completed}
+    - {requirement: REQ-008, task: T014, files: [internal/brief/greeting_test.go, internal/brief/brief_test.go, scripts/test-install.sh], status: completed}
+  test_results:
+    command: go test -race -cover ./...
+    passed: 64
+    failed: 0
+    skipped: 0
+    core_statement_coverage_percent: 93.8
+  validation: {vet: passed, installation_tests: passed, user_local_reinstall: passed}
+  errors: []
+  warnings: []

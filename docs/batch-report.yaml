@@ -1,0 +1,143 @@
+batch_id: B01
+completed_tasks: [T001, T002, T003, T004, T005, T006, T007, T008]
+blocked_tasks: []
+files_changed:
+  T001:
+    - {file: docs/spec.md, change_type: created, description: Feature requirements and acceptance scenarios}
+    - {file: docs/constitution.md, change_type: created, description: Project principles}
+    - {file: docs/architecture.md, change_type: created, description: Components and local data model}
+    - {file: docs/plan.md, change_type: created, description: Tasks and requirement mapping}
+  T002:
+    - {file: internal/brief/brief_test.go, change_type: created, description: Hermetic acceptance tests}
+  T003:
+    - {file: internal/brief/onboard.go, change_type: created, description: Validated topic and name prompts}
+    - {file: internal/brief/store.go, change_type: created, description: Atomic local state}
+  T004:
+    - {file: internal/brief/feed.go, change_type: created, description: RSS Atom and HN adapters}
+    - {file: internal/brief/tips.go, change_type: created, description: Eighteen sourced tips}
+    - {file: internal/brief/text.go, change_type: created, description: Terminal text and URL safety}
+  T005:
+    - {file: internal/brief/model.go, change_type: created, description: Models selection rotation and bounded history}
+    - {file: internal/brief/app.go, change_type: created, description: Per-source caching and offline mode}
+  T006:
+    - {file: cmd/opsmosaic/main.go, change_type: created, description: Process entry point and exit errors}
+    - {file: internal/brief/app.go, change_type: created, description: CLI validation and rendering}
+    - {file: go.mod, change_type: created, description: Dependency-free Go module}
+    - {file: .gitignore, change_type: created, description: Ignore generated binary and coverage}
+  T007:
+    - {file: bin/opsmosaic, change_type: created, description: Verified local executable ignored by version control}
+  T008:
+    - {file: README.md, change_type: created, description: Getting started and source privacy behavior}
+    - {file: docs/testing.md, change_type: created, description: Automated and manual test cases}
+    - {file: docs/checkpoints/tasks-to-impl.yaml, change_type: created, description: Completed task traceability}
+    - {file: docs/batch-report.yaml, change_type: created, description: Verification record}
+upstream_artifacts_consumed:
+  implementation:
+    - {artifact: docs/spec.md, used_for: REQ-001 through REQ-008}
+    - {artifact: docs/constitution.md, used_for: Dependency-free local-first principles}
+    - {artifact: docs/architecture.md, used_for: Package and state design}
+    - {artifact: docs/plan.md, used_for: Task dependencies and requirement mapping}
+evidence_mapping:
+  T003:
+    - {upstream: "docs/spec.md#REQ-001", output: internal/brief/onboard.go, evidence: TestOnboard and TestCLIOnboardingAndReturn}
+  T004:
+    - {upstream: "docs/spec.md#REQ-004", output: internal/brief/feed.go, evidence: TestParseFeed TestHackerNews and TestCISAPublicationDate}
+  T005:
+    - {upstream: "docs/spec.md#REQ-005", output: internal/brief/app.go, evidence: TestCLICacheLifecycle and TestCLICacheTTL}
+traceability:
+  - {requirement: REQ-001, plan_item: Phase 2, task: T003, files: [internal/brief/onboard.go, internal/brief/store.go], status: completed}
+  - {requirement: REQ-002, plan_item: Phase 2, task: T006, files: [internal/brief/model.go, internal/brief/app.go], status: completed}
+  - {requirement: REQ-003, plan_item: Phase 2, task: T004, files: [internal/brief/tips.go], status: completed}
+  - {requirement: REQ-004, plan_item: Phase 2, task: T004, files: [internal/brief/feed.go], status: completed}
+  - {requirement: REQ-005, plan_item: Phase 2, task: T005, files: [internal/brief/app.go, internal/brief/store.go], status: completed}
+  - {requirement: REQ-006, plan_item: Phase 2, task: T006, files: [internal/brief/app.go, internal/brief/model.go], status: completed}
+  - {requirement: REQ-007, plan_item: Phase 2, task: T004, files: [internal/brief/text.go, internal/brief/store.go], status: completed}
+  - {requirement: REQ-008, plan_item: Phase 3, task: T007, files: [internal/brief/brief_test.go, docs/testing.md], status: completed}
+protocol_violation: false
+errors: []
+warnings: []
+test_results:
+  B01:
+    command: go test -race -coverprofile=bin-coverage.out ./...
+    passed: 49
+    failed: 0
+    skipped: 0
+    failures: []
+    core_statement_coverage_percent: 92.7
+    whole_project_statement_coverage_percent: 91.5
+validation:
+  vet: passed
+  build: passed
+  live_sources: 9
+  offline_smoke: passed
+  invalid_argument_exit: passed
+  personal_state_modified: false
+  editor_problems: 0
+follow_up:
+  batch_id: B02
+  date: "2026-10-14"
+  completed_tasks: [T009]
+  blocked_tasks: []
+  files_changed:
+    T009:
+      - {file: internal/brief/app.go, change_type: modified, description: Default count one and mixed random candidate pool}
+      - {file: internal/brief/model.go, change_type: modified, description: Random kind and item selection with unseen preference}
+      - {file: internal/brief/brief_test.go, change_type: modified, description: Deterministic random branch and override tests}
+      - {file: README.md, change_type: modified, description: Document single random default}
+      - {file: docs/spec.md, change_type: modified, description: Updated REQ-006}
+      - {file: docs/architecture.md, change_type: modified, description: Random selection flow}
+      - {file: docs/testing.md, change_type: modified, description: Random selection acceptance cases}
+      - {file: docs/plan.md, change_type: modified, description: Completed follow-up TODO}
+      - {file: docs/checkpoints/tasks-to-impl.yaml, change_type: modified, description: T009 traceability}
+      - {file: docs/batch-report.yaml, change_type: modified, description: Follow-up evidence}
+  traceability:
+    - {requirement: REQ-006, plan_item: Follow-up single random item, task: T009, files: [internal/brief/app.go, internal/brief/model.go, internal/brief/brief_test.go], status: completed}
+  protocol_violation: false
+  errors: []
+  warnings: []
+  test_results:
+    T009:
+      command: go test -race -cover ./...
+      passed: 60
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 93.6
+  validation: {vet: passed, build: passed, isolated_binary_smoke: passed, personal_state_modified: false}
+installation_follow_up:
+  batch_id: B03
+  date: "2026-10-14"
+  completed_tasks: [T010, T011, T012]
+  blocked_tasks: []
+  files_changed:
+    T010:
+      - {file: README.md, change_type: modified, description: Generic name placeholder and macOS standalone installation instructions}
+      - {file: docs/testing.md, change_type: modified, description: Installation acceptance tests}
+      - {file: docs/plan.md, change_type: modified, description: Completed install tasks and pending tap publication}
+    T011:
+      - {file: Makefile, change_type: created, description: Build install test and vet targets with PREFIX and DESTDIR}
+    T012:
+      - {file: scripts/test-install.sh, change_type: created, description: Isolated standalone command and staging tests}
+      - {file: docs/checkpoints/tasks-to-impl.yaml, change_type: modified, description: Installation traceability}
+      - {file: docs/batch-report.yaml, change_type: modified, description: Installation verification record}
+  traceability:
+    - {requirement: REQ-008, plan_item: Follow-up portable installation, task: T012, files: [Makefile, scripts/test-install.sh, README.md], status: completed}
+  protocol_violation: false
+  errors: []
+  warnings: []
+  test_results:
+    T012:
+      command: go test -race ./...
+      passed: 60
+      failed: 0
+      skipped: 0
+      failures: []
+      installation_command: make test-install
+      installation_result: passed
+  validation:
+    vet: passed
+    build: passed
+    user_local_install: passed
+    standalone_path_lookup: passed
+    homebrew_tap_published: false
+    personal_profile_modified: false

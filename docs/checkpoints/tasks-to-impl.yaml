@@ -1,0 +1,117 @@
+metadata:
+  generated: "2026-10-13"
+  source_tasks: docs/plan.md
+  last_updated: "2026-10-14"
+summary:
+  total_tasks: 12
+  completed_tasks: 12
+  in_progress_tasks: 0
+  pending_tasks: 0
+  completion_percentage: 100
+tasks:
+  - task_id: T001
+    description: Record project context and contracts
+    status: completed
+    implementation:
+      files_changed: [docs/spec.md, docs/constitution.md, docs/architecture.md, docs/plan.md]
+    upstream_trace:
+      plan_item: Phase 1
+      requirements: [REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008]
+  - task_id: T002
+    description: Write hermetic tests before implementation
+    status: completed
+    implementation:
+      files_changed: [internal/brief/brief_test.go]
+    verification:
+      test_results: {command: "go test -race ./...", passed: 49, failed: 0, skipped: 0, failures: []}
+    upstream_trace:
+      plan_item: Phase 1
+      requirements: [REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008]
+  - task_id: T003
+    description: Implement onboarding and storage
+    status: completed
+    implementation:
+      files_changed: [internal/brief/onboard.go, internal/brief/store.go]
+    upstream_trace: {plan_item: Phase 2, requirements: [REQ-001, REQ-002, REQ-007]}
+  - task_id: T004
+    description: Implement tips and safe feed adapters
+    status: completed
+    implementation:
+      files_changed: [internal/brief/feed.go, internal/brief/tips.go, internal/brief/text.go]
+    upstream_trace: {plan_item: Phase 2, requirements: [REQ-003, REQ-004, REQ-007]}
+  - task_id: T005
+    description: Implement caching and balanced selection
+    status: completed
+    implementation:
+      files_changed: [internal/brief/model.go, internal/brief/app.go]
+    upstream_trace: {plan_item: Phase 2, requirements: [REQ-004, REQ-005, REQ-006]}
+  - task_id: T006
+    description: Wire CLI and rendering
+    status: completed
+    implementation:
+      files_changed: [cmd/opsmosaic/main.go, internal/brief/app.go, go.mod, .gitignore]
+    upstream_trace: {plan_item: Phase 2, requirements: [REQ-001, REQ-002, REQ-005, REQ-006]}
+  - task_id: T007
+    description: Verify executable and source behavior
+    status: completed
+    implementation:
+      files_changed: [bin/opsmosaic]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race ./...", passed: 49, failed: 0, skipped: 0, failures: []}
+      notes: Vet passed; all nine live sources and offline mode smoke-tested using temporary state.
+    upstream_trace: {plan_item: Phase 3, requirements: [REQ-008]}
+  - task_id: T008
+    description: Document usage and verification
+    status: completed
+    implementation:
+      files_changed: [README.md, docs/testing.md, docs/batch-report.yaml, docs/checkpoints/tasks-to-impl.yaml]
+    upstream_trace: {plan_item: Phase 3, requirements: [REQ-008]}
+  - task_id: T009
+    description: Default to one random item with explicit option overrides
+    status: completed
+    implementation:
+      files_changed: [internal/brief/app.go, internal/brief/model.go, internal/brief/brief_test.go, README.md, docs/spec.md, docs/architecture.md, docs/testing.md, docs/plan.md]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race -cover ./...", passed: 60, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 93.6%; vet and isolated executable count/override smoke checks passed.
+    upstream_trace: {plan_item: Follow-up single random item, requirements: [REQ-006]}
+  - task_id: T010
+    description: Make README examples generic and document macOS installation
+    status: completed
+    implementation:
+      files_changed: [README.md, docs/testing.md, docs/plan.md]
+    upstream_trace: {plan_item: Follow-up portable installation, requirements: [REQ-008]}
+  - task_id: T011
+    description: Provide user-local standalone installation with configurable prefix
+    status: completed
+    implementation:
+      files_changed: [Makefile]
+    upstream_trace: {plan_item: Follow-up portable installation, requirements: [REQ-008]}
+  - task_id: T012
+    description: Verify installation and install the standalone command locally
+    status: completed
+    implementation:
+      files_changed: [scripts/test-install.sh]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race ./...", passed: 60, failed: 0, skipped: 0, failures: []}
+      notes: make test-install and vet passed; user-local executable resolved on PATH outside the checkout.
+    upstream_trace: {plan_item: Follow-up portable installation, requirements: [REQ-008]}
+pending_tasks: []
+untracked_changes: []
+traceability_chain:
+  - {requirement: REQ-001, tasks: [T002, T003, T006], status: complete}
+  - {requirement: REQ-002, tasks: [T002, T003, T006], status: complete}
+  - {requirement: REQ-003, tasks: [T002, T004], status: complete}
+  - {requirement: REQ-004, tasks: [T002, T004, T005], status: complete}
+  - {requirement: REQ-005, tasks: [T002, T005, T006], status: complete}
+  - {requirement: REQ-006, tasks: [T002, T005, T006, T009], status: complete}
+  - {requirement: REQ-007, tasks: [T002, T003, T004], status: complete}
+  - {requirement: REQ-008, tasks: [T002, T007, T008, T010, T011, T012], status: complete}
+validation:
+  passed: true
+  errors: []
+  warnings: []
+  blocking_issues: []

@@ -2,7 +2,7 @@ GO ?= go
 PREFIX ?= $(HOME)/.local
 DESTDIR ?=
 
-.PHONY: build install test test-install vet
+.PHONY: build install test test-install vet ci release test-release
 
 build:
 	$(GO) build -o bin/opsmosaic ./cmd/opsmosaic
@@ -21,3 +21,12 @@ test-install:
 
 vet:
 	$(GO) vet ./...
+
+ci:
+	GO="$(GO)" sh scripts/ci.sh
+
+release:
+	GO="$(GO)" sh scripts/release.sh "$(VERSION)"
+
+test-release:
+	GO="$(GO)" sh scripts/test-release.sh

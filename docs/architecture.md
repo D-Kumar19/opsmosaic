@@ -26,7 +26,7 @@ without requiring a real terminal; release verification also probes a real PTY.
 
 ## Data flow
 
-Parse command -> acquire bounded state lock -> load or create profile ->
+Parse command -> early help/version exit -> acquire bounded state lock -> load or create profile ->
 resolve topics -> load cache ->
 fetch stale selected sources concurrently -> filter and deduplicate items ->
 randomly choose one available kind -> prefer unseen content within that kind ->
@@ -91,3 +91,19 @@ for AI. General feeds are title-filtered and are not comprehensive indexes.
 HTTP has a five-second client timeout, a 2 MiB response cap, and bounded
 parallel source fetches (maximum nine). HN scans at most 30 top-story items,
 with bounded parallel requests and a whole-source timeout.
+
+## Build and release boundaries
+
+`version.go` owns linker-settable version, commit and UTC timestamp fields,
+with explicit development defaults. Version output exits before profile/cache
+access or lock acquisition, sanitizes metadata, and propagates output failures.
+It is not combined with briefing options or subcommands.
+
+`make ci` is a portable local entry point, not an active hosted workflow.
+`scripts/release.sh` stages four cross-builds, source documentation and dependency
+licenses in ignored output, computes SHA-256 checksums, then renames the finished
+directory. Clean-source and overwrite guards prevent misleading packages.
+`scripts/test-release.sh` runs in a disposable committed repository, verifies
+every archive's metadata/licenses and a native standalone briefing, and exercises
+failure guards. No scripts tag or publish. Remote CI and distribution remain
+gated on verified project runners and approval; see [CI](ci.md) and [releases](releases.md).

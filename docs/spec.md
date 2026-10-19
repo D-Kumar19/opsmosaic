@@ -54,6 +54,15 @@ read: a practical tip, relevant news, and project releases with original links.
   automatically while keeping textual greetings. `--color=auto|always|never`
   uses subtle cyan headings, warm greetings and dim metadata; plain output and
   nonempty `NO_COLOR` override color, even `always`. Empty `NO_COLOR` does not.
+- REQ-010: Keep source and artifacts on project infrastructure with visibility
+  unchanged and no external publication. Add the approved MIT source license,
+  contributor guidance, SemVer/changelog and truthful support documentation.
+  `--version` reports dev/release version, commit and UTC build time without
+  onboarding, network or state changes. Provide portable local CI checks and
+  isolated four-target release/archive/checksum tests. Package dependency
+  licenses and require clean committed source; never overwrite a version.
+  Remote CI requires verified project runners and success/failure evidence.
+  Tagging, pushing and uploading require separate explicit approval.
 
 ## Acceptance scenarios
 
@@ -72,6 +81,10 @@ read: a practical tip, relevant news, and project releases with original links.
 9. Concurrent processes do not lose saved state updates; busy snapshot readers
    do not fetch or mutate state. An interrupted lock holder leaves no stale lock.
 10. Offline five-day-old news shows its age/stale label and one refresh hint.
+11. A new user can run `--version` without creating state or making requests.
+    Release archives carry embedded metadata, documentation and licenses;
+    tampered archives fail checksum verification. Failed packaging leaves no
+    completed output. Cross-builds are not claimed as native runtime tests.
 
 ## Deliberate first-release scope
 
@@ -86,5 +99,5 @@ license for republishing full articles.
 ## Later possibilities
 
 Arrow-key multi-selection, opt-in
-shell greeting, user-supplied feeds, bookmarks, release packaging, and optional
+shell greeting, user-supplied feeds, bookmarks, remote release publishing, and optional
 AI summaries. These are backlog items, not first-release requirements.

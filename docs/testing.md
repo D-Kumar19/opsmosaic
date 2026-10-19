@@ -6,6 +6,18 @@ Run `make test-install` to verify copying to a custom prefix, executable
 permissions, PATH lookup outside the checkout, staged installation with
 `DESTDIR`, first-run setup, explicit count, and invalid-option exit status.
 Install tests use disposable directories, including a prefix containing spaces.
+Run `make ci` for the combined formatting/module/race/vet/build/install checks.
+Run `make test-release` for an isolated committed fixture: four target archives,
+embedded metadata in every binary, exact bundled documentation/dependency
+licenses, checksums and deliberate tampering, native version/onboarding smoke,
+invalid versions, dirty-tree/overwrite guards, failed-build cleanup and a
+deliberately unformatted file rejected by the CI entry point.
+
+Phase 3 local verification used Go 1.27.2 on macOS arm64: 107 passing Go test
+cases (including subtests), zero failures/skips, 94.1% core statement coverage.
+Only macOS arm64 execution was verified; other targets were cross-built.
+Go 1.24 and the remote Go/OS matrix remain unverified pending tooling/runners.
+See [CI readiness](ci.md); do not interpret local success as remote CI.
 
 | Area | Cases |
 |---|---|
@@ -30,6 +42,8 @@ Install tests use disposable directories, including a prefix containing spaces.
 | Freshness | Before/at six-hour boundary, old/missing/future retrieval dates, truthful labels after failed refresh, exactly one selected-stale hint, no hint for unselected stale items |
 | Display | Compact/detailed shape, default one card, Unicode wrapping at 4/12/20/40/80/100 columns, long names, CJK/combining/ZWJ emoji, unchanged commands and URLs, 80-column fallback |
 | Output policy | TTY/non-TTY/dumb/unknown terminals; plain overrides color; nonempty NO_COLOR (including zero) beats always; never disables color; redirected output keeps text greetings without ANSI/decorations |
+| Version | Dev defaults, explicit release metadata, no profile/cache/lock creation, no network, invalid combinations, output-writer failures |
+| Release | Four archives, metadata in all targets, native command smoke, documentation/license fidelity, checksum verification/tampering, invalid version/dirty tree/overwrite rejection, failed-build cleanup |
 
 ## Manual acceptance
 

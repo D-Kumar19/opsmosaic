@@ -49,6 +49,7 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	detailed := flags.Bool("detailed", false, "show full layout and interests")
 	plain := flags.Bool("plain", false, "disable emoji, borders, and color")
 	color := flags.String("color", "auto", "color mode: auto, always, never")
+	version := flags.Bool("version", false, "show version without setup")
 	flags.Usage = func() {
 		fmt.Fprintln(out, "OpsMosaic - a personal DevOps, cloud, security and AI briefing")
 		fmt.Fprintln(out, "\nUsage: opsmosaic [config|refresh] [options]")
@@ -59,6 +60,7 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 		fmt.Fprintln(out, "  --count N       Maximum total items (1-20; default 1)")
 		fmt.Fprintln(out, "  Default: one random tip, news item, or release matching your interests.")
 		fmt.Fprintln(out, "  --help          Show help without setup")
+		fmt.Fprintln(out, "  --version       Show version, commit, and build time without setup")
 		fmt.Fprintln(out, "  --detailed      Full layout with interests footer (default: compact)")
 		fmt.Fprintln(out, "  --plain         No emoji, decorative borders, or color")
 		fmt.Fprintln(out, "  --color MODE    auto|always|never; --plain and NO_COLOR take precedence")
@@ -72,6 +74,15 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	}
 	if flags.NArg() > 0 {
 		return fmt.Errorf("unexpected argument %q; use --help", cleanText(flags.Arg(0)))
+	}
+	if *version {
+		if command != "" || flags.NFlag() != 1 {
+			return fmt.Errorf("--version cannot be combined with other options or commands")
+		}
+		if _, err := fmt.Fprintln(out, versionString()); err != nil {
+			return fmt.Errorf("write version: %w", err)
+		}
+		return nil
 	}
 	if *count < 1 || *count > 20 {
 		return fmt.Errorf("--count must be between 1 and 20")

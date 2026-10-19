@@ -277,3 +277,59 @@ display_milestone:
       failures: []
       core_statement_coverage_percent: 94.1
   validation: {vet: passed, installation_tests: passed, real_40_column_pty: passed, linux_amd64_cross_compile: passed, user_local_reinstall: passed}
+release_foundations_follow_up:
+  batch_id: B07
+  date: "2026-10-19"
+  completed_tasks: [T025, T026, T028, T029, T033]
+  blocked_tasks: [T027, T030]
+  files_changed:
+    T025: [README.md, docs/plan.md, docs/spec.md]
+    T026: [LICENSE, README.md]
+    T027: [scripts/ci.sh, Makefile, docs/ci.md]
+    T028: [internal/brief/app.go, internal/brief/version.go, internal/brief/version_test.go]
+    T029: [CHANGELOG.md, docs/releases.md]
+    T030: [scripts/release.sh, scripts/test-release.sh, Makefile, .gitignore]
+    T033: [CONTRIBUTING.md, docs/testing.md, docs/architecture.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved repository-scoped release scope and T025-T030/T033}
+      - {artifact: docs/spec.md, used_for: REQ-010 and preservation of existing briefing behavior}
+  evidence_mapping:
+    T025: [User approved retaining project host and current visibility; repository API checked read-only]
+    T026: [Approved MIT license and source/article rights distinction]
+    T027: [make ci passes locally; deliberate formatting failure rejected; remote runner blocked]
+    T028: [TestVersionWithoutState, TestVersionMetadataAndInvalidArguments, four archive metadata checks]
+    T029: [Support table distinguishes native runtime tests from cross-builds]
+    T030: [make test-release verifies isolated committed fixture and native command without publishing]
+    T033: [Documented build/install/release checks exercised in isolated fixtures]
+  traceability:
+    - {requirement: REQ-010, tasks: [T025, T026, T028, T029, T033], status: completed}
+    - {requirement: REQ-010, tasks: [T027, T030], status: blocked}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: HIGH, message: No verified project runner; remote CI workflow and successful/failing remote runs remain blocked.}
+    - {severity: LOW, message: Go 1.24 and native non-arm64-macOS matrix remain unverified; local compiler was Go 1.27.2.}
+  test_results:
+    B07:
+      command: make ci; make test-release; go test -json ./...
+      passed: 107
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 94.1
+      release_targets: [darwin_arm64, darwin_amd64, linux_arm64, linux_amd64]
+      native_runtime: darwin_arm64
+      release_checks: [archive_layout, metadata_all_targets, dependency_license_fidelity, checksums, tamper_detection, invalid_versions, clean_tree_guard, overwrite_guard, failed_build_cleanup, native_onboarding, ci_format_failure]
+  validation:
+    local_ci: passed
+    installation_tests: passed
+    release_fixture: passed
+    user_local_reinstall: passed
+    remote_ci: blocked
+    phase_one_two_checkpoint_commit: 9f9411d
+    phase_three_committed: false
+    pushed: false
+    tagged: false
+    uploaded: false
+    personal_state_modified: false

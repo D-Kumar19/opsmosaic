@@ -29,7 +29,7 @@ xcode-select --install
 
 ### 2. Clone and install
 
-Once this repository has been published:
+For users with access to the project-hosted repository:
 
 ```sh
 git clone https://github.com/D-Kumar19/opsmosaic.git
@@ -70,7 +70,7 @@ formula and accessible source or release artifacts; this is tracked in the
 
 ### Updating, custom locations, and uninstalling
 
-After publication, update your checkout and reinstall:
+Update your checkout and reinstall:
 
 ```sh
 git pull --ff-only
@@ -159,6 +159,7 @@ opsmosaic --offline
 opsmosaic refresh
 opsmosaic config
 opsmosaic --help
+opsmosaic --version
 opsmosaic --detailed
 opsmosaic --plain
 opsmosaic --color=never
@@ -295,6 +296,8 @@ go test -race -cover ./...
 go vet ./...
 go build -o bin/opsmosaic ./cmd/opsmosaic
 make test-install
+make ci
+make test-release
 ```
 
 Tests use temporary directories and `httptest` servers: no live internet,
@@ -312,4 +315,24 @@ The topic picker is SSH-friendly and numbered. The renderer uses
 [`x/term`](https://pkg.go.dev/golang.org/x/term) for terminal detection and
 [`uniseg`](https://pkg.go.dev/github.com/rivo/uniseg) for Unicode display widths;
 their Go dependencies are compiled into the standalone executable.
-A full-screen picker, custom feeds and release packaging remain on the backlog.
+A full-screen picker, custom feeds, and remote release publishing remain on the backlog.
+
+## Versioning, releases, and contributions
+
+The code remains on project infrastructure; do not mirror it externally. Repository
+visibility is unchanged. Source builds report `dev`; `opsmosaic --version`
+shows version, commit and build time without onboarding or network requests.
+
+`v0.1.0` is the proposed first release, not an existing tag. Local archives for
+macOS/Linux arm64/amd64 can be generated from a clean committed checkout using
+`make release VERSION=v0.1.0`. Packaging does not tag, push or upload anything.
+See [release policy and verification](docs/releases.md) before distribution.
+Cross-compiled targets are not yet native-runtime-certified.
+
+`make ci` runs portable checks locally. Remote GitHub Actions wiring is
+**blocked pending a verified project runner**; there is no live CI badge or claimed
+remote matrix result. See [CI readiness](docs/ci.md).
+
+See [contributor instructions](CONTRIBUTING.md), [changelog](CHANGELOG.md),
+and the [MIT source-code license](LICENSE). The code license does not cover
+third-party article bodies or bypass maintainer publication requirements.

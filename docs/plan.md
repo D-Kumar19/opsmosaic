@@ -33,6 +33,7 @@ T006 follows T005; T007 follows T006; T008 follows T007.
 | REQ-007 | T002, T003, T004 | sanitization, link validation, permissions |
 | REQ-008 | T002, T007, T008 | test/race/vet/build/smoke evidence |
 | REQ-009 | T019, T020, T021, T022 | Unicode layout, output policy and CLI display tests |
+| REQ-010 | T025, T026, T027, T028, T029, T030, T033 | Version tests, local CI and isolated release tests; remote runner/publication gates blocked |
 
 ## Future backlog
 
@@ -43,7 +44,8 @@ progress; recording tasks does not approve a design, publication, or release.
 
 - Work on tasks only when requested. On 2026-10-19 the user authorized the
   first milestone (Reliability, T015-T018), then the second milestone
-  (Display polish, T019-T022); later milestones remain unstarted.
+  (Display polish, T019-T022), and then release foundations
+  (T025-T030, T033). Later milestones remain unstarted.
 - Before implementing a task, ask the user about unresolved behavior, scope,
   or design decisions using the clarification form. Do not silently choose
   between materially different approaches.
@@ -172,40 +174,51 @@ standalone command; personal profile/cache were not used for verification.
 
 ### Publication and release foundations
 
-- [ ] **T025 [P1] Confirm publication rights and repository destination.**
+- [x] **T025 [P1] Confirm publication rights and repository destination.**
   Confirm code ownership, permission to publish publicly,
   intended audience, and public/private destination. Update clone/support
   links only after approval and verify access for the intended audience.
-  **Ask first:** does the user have permission to publish, and what host,
-  account/organization, repository URL, and visibility should be used?
+  **Approved 2026-10-19:** stay on `github.com/D-Kumar19/opsmosaic`;
+  leave visibility unchanged (API reports `private: false`). No external
+  publication or mirror is approved. External publication rights are not
+  established; this completion records the chosen repository-scoped scope.
   Dependencies: none.
-- [ ] **T026 [P1] Choose and add a license.**
+- [x] **T026 [P1] Choose and add a license.**
   Add the approved license with correct holder/year; clarify third-party
   feed/content terms separately from the source-code license.
   Verify license identification and README links.
-  **Ask first:** MIT, Apache-2.0, or another license; who is the copyright
-  holder, and are there maintainer requirements?
+  **Approved 2026-10-19:** MIT, Copyright (c) 2026 Dheeraj Kumar;
+  source licensing does not grant rights to third-party article bodies or
+  override maintainer controls.
   Dependencies: T025.
 - [ ] **T027 [P1] Add continuous integration.**
   Automate formatting checks, unit tests, race tests, vet, build, and isolated
   installation tests. Set a supported Go/OS matrix and useful failure output.
   Verify the chosen runner executes the commands and a deliberate failure
   fails the job; do not claim CI is live before its remote run is checked.
-  **Ask first:** which CI provider is supported by the final repository,
-  runner availability, Go versions, and OS matrix?
+  **Approved 2026-10-19:** inspect project Actions and actual runners; do not guess
+  labels. Intended matrix: Go 1.24.x/latest stable on native macOS/Linux.
+  **Blocked:** Actions enabled but zero visible self-hosted runners and hosted
+  availability unverified (404). Team examples do not prove access.
+  `make ci` and deliberate local formatting failure pass verification;
+  remote wiring and real success/failure runs remain outstanding. See `docs/ci.md`.
   Dependencies: T025.
-- [ ] **T028 [P1] Add version/build metadata.**
+- [x] **T028 [P1] Add version/build metadata.**
   Implement `opsmosaic --version` with a development fallback and release
   version/commit/build information. Keep help/version free of onboarding,
   state writes, and network requests.
   Test local builds, release metadata, invalid arguments, and missing profile.
-  **Ask first:** version output format and initial version (`v0.1.0` proposed)?
+  **Approved 2026-10-19:** target `v0.1.0`; output includes version, full commit
+  and UTC build time, with explicit `dev`/`unknown` source-build defaults.
   Dependencies: none.
-- [ ] **T029 [P1] Document support and release policy.**
+- [x] **T029 [P1] Document support and release policy.**
   Define supported macOS/Linux architectures and minimum Go version for
   contributors; add a changelog and tag/version conventions.
   Verify the support claims match actual build/test coverage.
-  **Ask first:** initial platform scope, prerelease policy, and changelog style?
+  **Approved 2026-10-19:** macOS/Linux arm64/amd64 targets, Go 1.24 minimum,
+  SemVer with alpha/beta/rc prereleases and Keep a Changelog-style notes.
+  Local runtime verified only on macOS arm64 with Go 1.27.2; other targets
+  cross-built, Go 1.24/native matrix not yet verified.
   Dependencies: T025.
 - [ ] **T030 [P1] Automate downloadable releases and checksums.**
   Build versioned macOS arm64/amd64 and approved Linux binaries, package them
@@ -213,8 +226,13 @@ standalone command; personal profile/cache were not used for verification.
   Test metadata, archive layout, checksum verification, and standalone
   execution on native runners where available; distinguish cross-compilation
   from tested runtime support. Require approval before publishing/tagging.
-  **Ask first:** release tool versus scripts, artifact host, naming, Linux
-  architectures, and manual versus automatic publishing approval?
+  **Approved 2026-10-19:** portable local scripts, four targets, tar.gz archives,
+  SHA-256 checksums, embedded metadata and dependency licenses. Manual
+  publication approval required; artifact-host integration deferred.
+  **Locally implemented and verified:** `make test-release`, including all
+  archive contents/metadata, native smoke, tampering and failure guards.
+  **Blocked:** T027 remote/native CI prerequisite; real distribution/tagging
+  also requires artifact destination and explicit approval. No release uploaded.
   Dependencies: T026, T027, T028, T029.
 - [ ] **T031 [P2] Publish a real Homebrew tap.**
   Create a formula backed by accessible tagged source or release artifacts,
@@ -234,12 +252,14 @@ standalone command; personal profile/cache were not used for verification.
 
 ### Community and portfolio presentation
 
-- [ ] **T033 [P2] Add contributor guidance.**
+- [x] **T033 [P2] Add contributor guidance.**
   Explain local setup, tests, source/tip additions, review expectations and
   where to report bugs; add concise issue/PR templates if useful.
   Verify instructions from a clean checkout and use the chosen platform's
   supported template format.
-  **Ask first:** contribution scope, support expectations and issue platform?
+  **Approved 2026-10-19:** contributors with project repository access, issues/PRs
+  on that host, concise setup/test/source/tip/review instructions. Templates
+  deferred. Build/install/release instructions verified using isolated fixtures.
   Dependencies: T025.
 - [ ] **T034 [P2] Add a short terminal demo.**
   Show onboarding, time-aware greeting, one random item, and offline behavior.

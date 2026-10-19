@@ -21,7 +21,7 @@ func cleanText(text string) string {
 		if unicode.IsSpace(r) {
 			return ' '
 		}
-		if unicode.IsControl(r) || unicode.In(r, unicode.Cf) {
+		if unicode.IsControl(r) || unicode.In(r, unicode.Cf) && r != '\u200d' {
 			return -1
 		}
 		return r

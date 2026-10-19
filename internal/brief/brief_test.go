@@ -380,13 +380,13 @@ func (failedWriter) Write([]byte) (int, error) {
 func TestRenderSafetyAndWriteError(t *testing.T) {
 	item := Item{Kind: "news", Topic: "aws", Title: "\x1b[31mTitle\x1b[0m", Source: "\x1b]0;bad\aSource", URL: "javascript:alert(1)"}
 	var out bytes.Buffer
-	if err := render(&out, "Name", []string{"aws"}, []Item{item}, time.Now(), 0); err != nil {
+	if err := renderDisplay(&out, "Name", []string{"aws"}, []Item{item}, time.Now(), 0, displayOptions{Plain: true}); err != nil {
 		t.Fatal(err)
 	}
 	if strings.ContainsAny(out.String(), "\x1b\a") || strings.Contains(out.String(), "javascript:") {
 		t.Fatalf("unsafe terminal rendering: %q", out.String())
 	}
-	if err := render(failedWriter{}, "Name", nil, nil, time.Now(), 0); err == nil {
+	if err := renderDisplay(failedWriter{}, "Name", nil, nil, time.Now(), 0, displayOptions{}); err == nil {
 		t.Fatal("output errors must propagate")
 	}
 }
@@ -650,7 +650,7 @@ func TestCLISingleRandomDefaultAndExplicitOptions(t *testing.T) {
 				return 0
 			}
 			out, warnings, err := runApp(a, tc.args, "Dheeraj\n3,5\n")
-			if err != nil || warnings != "" || !strings.Contains(out, strings.ToUpper(tc.kind)+" | "+topicName(tc.topic)+"\n") || !strings.Contains(out, "Showing 1 items") {
+			if err != nil || warnings != "" || !strings.Contains(out, strings.ToUpper(tc.kind)+" | "+topicName(tc.topic)+"\n") || strings.Contains(out, "Showing ") {
 				t.Fatalf("single random output: %s, %s, %v", out, warnings, err)
 			}
 			total := strings.Count(out, "TIP |") + strings.Count(out, "NEWS |") + strings.Count(out, "RELEASE |")
@@ -674,7 +674,7 @@ func TestCLIExplicitMixedCount(t *testing.T) {
 		t.Fatal(err)
 	}
 	out, _, err := runApp(a, []string{"--count", "3"}, "Dheeraj\n3\n")
-	if err != nil || strings.Count(out, "TIP |") != 1 || strings.Count(out, "NEWS |") != 2 || !strings.Contains(out, "Showing 3 items") {
+	if err != nil || strings.Count(out, "TIP |") != 1 || strings.Count(out, "NEWS |") != 2 || strings.Contains(out, "Showing ") {
 		t.Fatalf("explicit count no longer honored: %s, %v", out, err)
 	}
 }

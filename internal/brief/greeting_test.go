@@ -55,7 +55,7 @@ func TestCLIGreetingRotationPersists(t *testing.T) {
 			input = "Alex\n3\n"
 		}
 		out, _, err := runApp(a, []string{"--tips"}, input)
-		if err != nil || !strings.Contains(out, "☀️ Good morning, Alex!") || !strings.Contains(out, expected) || !strings.Contains(out, "Showing 1 items") {
+		if err != nil || !strings.Contains(out, "Good morning, Alex!") || !strings.Contains(out, expected) || strings.Count(out, "TIP |") != 1 {
 			t.Fatalf("visit %d: %s, %v", i, out, err)
 		}
 		// Reload state via a fresh App rather than relying on memory.

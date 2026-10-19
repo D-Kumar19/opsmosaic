@@ -82,11 +82,13 @@ type Item struct {
 	Command   string    `json:"command,omitempty"`
 	Published time.Time `json:"published,omitempty"`
 	Cached    bool      `json:"-"`
+	FetchedAt time.Time `json:"fetched_at,omitempty"`
 }
 
 type SourceCache struct {
-	Fetched time.Time `json:"fetched"`
-	Items   []Item    `json:"items"`
+	Fetched    time.Time `json:"fetched"`
+	Items      []Item    `json:"items"`
+	RetryAfter time.Time `json:"retry_after,omitempty"`
 }
 
 type Cache struct {
@@ -169,15 +171,6 @@ func selectRandomItem(items []Item, topics, recent []string, randomIndex func(in
 	for _, id := range recent {
 		seen[id] = true
 	}
-	var unseen []Item
-	for _, item := range candidates {
-		if !seen[item.ID] {
-			unseen = append(unseen, item)
-		}
-	}
-	if len(unseen) > 0 {
-		candidates = unseen
-	}
 	var kinds []string
 	groups := map[string][]Item{}
 	for _, item := range candidates {
@@ -191,7 +184,41 @@ func selectRandomItem(items []Item, topics, recent []string, randomIndex func(in
 	}
 	// Pick a kind first so high-volume news feeds do not drown out tips.
 	group := groups[kinds[randomIndex(len(kinds))]]
+	var unseen []Item
+	for _, item := range group {
+		if !seen[item.ID] {
+			unseen = append(unseen, item)
+		}
+	}
+	if len(unseen) > 0 {
+		group = unseen
+	}
 	return []Item{group[randomIndex(len(group))]}
+}
+
+func mergeItems(fresh, older []Item, olderFetched time.Time) []Item {
+	var merged []Item
+	seen := map[string]bool{}
+	for i, group := range [][]Item{fresh, older} {
+		for _, item := range group {
+			key := canonicalURL(item.URL)
+			if key == "" {
+				key = item.ID
+			}
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			if i == 1 && item.FetchedAt.IsZero() {
+				item.FetchedAt = olderFetched
+			}
+			merged = append(merged, item)
+			if len(merged) == 100 {
+				return merged
+			}
+		}
+	}
+	return merged
 }
 
 func rotateTopics(topics, recent []string, items []Item) []string {

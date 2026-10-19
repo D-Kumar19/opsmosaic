@@ -24,6 +24,12 @@ Install tests use disposable directories, including a prefix containing spaces.
 | Rendering | Control/ANSI/OSC stripping, markup decoding, safe URLs, output-writer failures |
 | Installation | Standalone PATH command, custom/spaced prefix, DESTDIR staging, no setup on help, onboarding and count/error options |
 | Greetings | All hour boundaries, device timezone, sanitized name, three-comment rotation and wrap, persisted visits across App instances, legacy-cache compatibility |
+| Partial HN | Successful items survive HTTP/malformed/timeout failures, merge deduplication and 100-item cap, preserved old ages, 15-minute retry boundary, explicit refresh bypass, empty partials, full recovery and total-failure retention |
+| Kind variety | Seen tips stay eligible alongside unseen news; unseen preference applies within a kind; equal kind selection remains deterministic in tests |
+| State locking | Concurrent CLI/test subprocesses preserve updates and source data; interrupted lock holder releases lock; 250 ms busy fallback never fetches/writes; busy config/setup errors and cancellation |
+| Freshness | Before/at six-hour boundary, old/missing/future retrieval dates, truthful labels after failed refresh, exactly one selected-stale hint, no hint for unselected stale items |
+| Display | Compact/detailed shape, default one card, Unicode wrapping at 4/12/20/40/80/100 columns, long names, CJK/combining/ZWJ emoji, unchanged commands and URLs, 80-column fallback |
+| Output policy | TTY/non-TTY/dumb/unknown terminals; plain overrides color; nonempty NO_COLOR (including zero) beats always; never disables color; redirected output keeps text greetings without ANSI/decorations |
 
 ## Manual acceptance
 

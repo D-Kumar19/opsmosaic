@@ -8,3 +8,6 @@
 - Maintainability: Go standard library first; tests use isolated directories
   and local HTTP servers rather than the user's configuration or live feeds.
 - Scope discipline: add a dependency only for a demonstrated need.
+- Clarification: before implementation, ask the user about unresolved behavior,
+  design, or scope choices; record decisions in the plan/spec rather than
+  silently assuming. Backlog tasks do not authorize publication or deployment.

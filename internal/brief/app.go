@@ -9,12 +9,14 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
 
-const cacheTTL = 6 * time.Hour
+const (
+	cacheTTL     = 6 * time.Hour
+	partialRetry = 15 * time.Minute
+)
 
 type App struct {
 	Store       Store
@@ -32,7 +34,7 @@ func NewApp() (*App, error) {
 	return &App{Store: store, Client: &http.Client{Timeout: 5 * time.Second}, Sources: DefaultSources(), Now: time.Now}, nil
 }
 
-func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warnings io.Writer) error {
+func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warnings io.Writer) (runErr error) {
 	command := ""
 	if len(args) > 0 && (args[0] == "config" || args[0] == "refresh") {
 		command, args = args[0], args[1:]
@@ -44,6 +46,9 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	offline := flags.Bool("offline", false, "use cache without network requests")
 	topic := flags.String("topic", "", "comma-separated topic slugs for this run")
 	count := flags.Int("count", 1, "maximum total items, 1-20")
+	detailed := flags.Bool("detailed", false, "show full layout and interests")
+	plain := flags.Bool("plain", false, "disable emoji, borders, and color")
+	color := flags.String("color", "auto", "color mode: auto, always, never")
 	flags.Usage = func() {
 		fmt.Fprintln(out, "OpsMosaic - a personal DevOps, cloud, security and AI briefing")
 		fmt.Fprintln(out, "\nUsage: opsmosaic [config|refresh] [options]")
@@ -54,6 +59,9 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 		fmt.Fprintln(out, "  --count N       Maximum total items (1-20; default 1)")
 		fmt.Fprintln(out, "  Default: one random tip, news item, or release matching your interests.")
 		fmt.Fprintln(out, "  --help          Show help without setup")
+		fmt.Fprintln(out, "  --detailed      Full layout with interests footer (default: compact)")
+		fmt.Fprintln(out, "  --plain         No emoji, decorative borders, or color")
+		fmt.Fprintln(out, "  --color MODE    auto|always|never; --plain and NO_COLOR take precedence")
 		fmt.Fprintln(out, "\nTopics: docker,kubernetes,aws,security,helm,argocd,kargo,crossplane,ai")
 	}
 	if err := flags.Parse(args); err != nil {
@@ -67,6 +75,9 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	}
 	if *count < 1 || *count > 20 {
 		return fmt.Errorf("--count must be between 1 and 20")
+	}
+	if *color != "auto" && *color != "always" && *color != "never" {
+		return fmt.Errorf("--color must be auto, always, or never")
 	}
 	if *tipsOnly && *newsOnly {
 		return fmt.Errorf("--tips and --news cannot be combined")
@@ -87,7 +98,27 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 			return err
 		}
 	}
+	lock, err := a.Store.lock(ctx, 250*time.Millisecond)
+	readOnly := errors.Is(err, errStateBusy)
+	if err != nil && !readOnly {
+		return err
+	}
+	if readOnly {
+		if command == "config" {
+			return fmt.Errorf("cannot save preferences while another OpsMosaic process holds the state lock; try again")
+		}
+		fmt.Fprintln(warnings, "Warning: state is busy; showing a read-only snapshot without fetching feeds or saving changes.")
+	} else {
+		defer func() {
+			if err := lock.Close(); err != nil {
+				runErr = errors.Join(runErr, fmt.Errorf("release state lock: %w", err))
+			}
+		}()
+	}
 	profile, err := a.Store.profile()
+	if readOnly && os.IsNotExist(err) {
+		return fmt.Errorf("setup is in progress in another terminal; run opsmosaic again when it finishes")
+	}
 	if command == "config" || os.IsNotExist(err) {
 		profile, err = Onboard(bufio.NewReader(in), out)
 		if err != nil {
@@ -115,15 +146,20 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	var items []Item
 	if !*tipsOnly {
 		var notes []string
-		items, notes = a.news(ctx, &cache, topics, now, command == "refresh", *offline)
+		items, notes = a.news(ctx, &cache, topics, now, command == "refresh", *offline || readOnly)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		for _, note := range notes {
 			fmt.Fprintln(warnings, "Warning:", cleanText(note))
 		}
 		if len(items) == 0 {
 			message := "No news available for these topics. Try opsmosaic refresh when online, or --tips."
 			if *newsOnly {
-				if err := writeJSON(a.Store.CachePath, cache); err != nil {
-					return err
+				if !readOnly {
+					if err := writeJSON(a.Store.CachePath, cache); err != nil {
+						return err
+					}
 				}
 				return errors.New(message)
 			}
@@ -153,8 +189,18 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if err := render(out, profile.Name, topics, chosen, now, cache.GreetingVisits); err != nil {
+	display := detectDisplay(out, *plain, *detailed, *color)
+	if err := renderDisplay(out, profile.Name, topics, chosen, now, cache.GreetingVisits, display); err != nil {
 		return err
+	}
+	for _, item := range chosen {
+		if _, stale := cacheFreshness(item, now); stale {
+			fmt.Fprintln(warnings, "Warning: selected news includes stale or unknown-age cache. Run opsmosaic refresh when online.")
+			break
+		}
+	}
+	if readOnly {
+		return nil
 	}
 	cache.Recent = remember(cache.Recent, chosen)
 	cache.GreetingVisits++
@@ -183,7 +229,11 @@ func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.
 	for i, source := range sources {
 		cached, exists := cache.Sources[source.ID]
 		age := now.Sub(cached.Fetched)
-		if offline || (!refresh && exists && age >= 0 && age < cacheTTL) {
+		fresh := age >= 0 && age < cacheTTL
+		if !cached.RetryAfter.IsZero() {
+			fresh = !now.Before(cached.RetryAfter.Add(-partialRetry)) && now.Before(cached.RetryAfter)
+		}
+		if offline || (!refresh && exists && fresh) {
 			results[i] = result{source: source}
 			continue
 		}
@@ -201,55 +251,33 @@ func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.
 	var notes []string
 	for _, result := range results {
 		source := result.source
-		fromCache := !result.fetched || result.err != nil
-		if result.err != nil {
+		entry := cache.Sources[source.ID]
+		var partial *PartialFetchError
+		updated := result.fetched && (result.err == nil || errors.As(result.err, &partial))
+		freshURLs := map[string]bool{}
+		if updated {
+			for i := range result.items {
+				result.items[i].FetchedAt = now
+				freshURLs[canonicalURL(result.items[i].URL)] = true
+			}
+			if partial != nil {
+				entry.Items = mergeItems(result.items, entry.Items, entry.Fetched)
+				entry.RetryAfter = now.Add(partialRetry)
+				notes = append(notes, fmt.Sprintf("%s: %v; merged successful stories with cached items; retry in 15 minutes.", source.Name, result.err))
+			} else {
+				entry = SourceCache{Fetched: now, Items: result.items}
+			}
+			cache.Sources[source.ID] = entry
+		} else if result.err != nil {
 			notes = append(notes, fmt.Sprintf("%s: %v; using cached items if available.", source.Name, result.err))
-		} else if !fromCache {
-			cache.Sources[source.ID] = SourceCache{Fetched: now, Items: result.items}
 		}
-		for _, item := range cache.Sources[source.ID].Items {
-			item.Cached = fromCache
+		for _, item := range entry.Items {
+			if item.FetchedAt.IsZero() {
+				item.FetchedAt = entry.Fetched
+			}
+			item.Cached = !updated || !freshURLs[canonicalURL(item.URL)]
 			items = append(items, item)
 		}
 	}
 	return items, notes
-}
-
-func render(out io.Writer, name string, topics []string, items []Item, now time.Time, visit uint64) error {
-	var b strings.Builder
-	b.WriteString("\n+-- OpsMosaic ✨ ------------------------------------------------+\n")
-	title, comment := greeting(name, now, visit)
-	fmt.Fprintf(&b, "  %s\n  %s\n", title, comment)
-	fmt.Fprintf(&b, "  🕒 %s\n", now.Format("Monday, 02 January 2006 | 15:04 MST"))
-	b.WriteString("+---------------------------------------------------------------+\n")
-	for _, item := range items {
-		fmt.Fprintf(&b, "\n%s | %s\n", strings.ToUpper(cleanText(item.Kind)), cleanText(topicName(item.Topic)))
-		fmt.Fprintf(&b, "  %s\n", cleanText(item.Title))
-		if item.Command != "" {
-			for _, line := range strings.Split(item.Command, "\n") {
-				fmt.Fprintf(&b, "    %s\n", cleanText(line))
-			}
-		}
-		fmt.Fprintf(&b, "  %s", cleanText(item.Source))
-		if !item.Published.IsZero() {
-			fmt.Fprintf(&b, " | %s", item.Published.In(now.Location()).Format("02 Jan 2006 15:04 MST"))
-		}
-		if item.Cached {
-			b.WriteString(" | cached")
-		}
-		b.WriteByte('\n')
-		if link := safeURL(item.URL); link != "" {
-			fmt.Fprintf(&b, "  %s\n", link)
-		}
-	}
-	var labels []string
-	for _, topic := range topics {
-		labels = append(labels, topicName(topic))
-	}
-	fmt.Fprintf(&b, "\nShowing %d items | Interests: %s\n\n", len(items), strings.Join(labels, ", "))
-	_, err := io.WriteString(out, b.String())
-	if err != nil {
-		return fmt.Errorf("write briefing: %w", err)
-	}
-	return nil
 }

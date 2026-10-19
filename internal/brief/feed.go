@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,18 @@ import (
 )
 
 const maxBody = 2 << 20
+
+type PartialFetchError struct {
+	Failed int
+	Total  int
+	Cause  error
+}
+
+func (e *PartialFetchError) Error() string {
+	return fmt.Sprintf("partial fetch: %d of %d story requests failed: %v", e.Failed, e.Total, e.Cause)
+}
+
+func (e *PartialFetchError) Unwrap() error { return e.Cause }
 
 type Source struct {
 	ID     string
@@ -164,7 +177,7 @@ func (s Source) fetchHN(ctx context.Context, client *http.Client) ([]Item, error
 		ids = ids[:30]
 	}
 	results := make([]Item, len(ids))
-	errors := make([]error, len(ids))
+	failures := make([]error, len(ids))
 	var wg sync.WaitGroup
 	limit := make(chan struct{}, 6)
 	for i, id := range ids {
@@ -175,12 +188,12 @@ func (s Source) fetchHN(ctx context.Context, client *http.Client) ([]Item, error
 			case limit <- struct{}{}:
 				defer func() { <-limit }()
 			case <-ctx.Done():
-				errors[i] = ctx.Err()
+				failures[i] = ctx.Err()
 				return
 			}
 			data, err := getBody(ctx, client, fmt.Sprintf("%s/item/%d.json", s.URL, id))
 			if err != nil {
-				errors[i] = err
+				failures[i] = err
 				return
 			}
 			var story struct {
@@ -192,7 +205,7 @@ func (s Source) fetchHN(ctx context.Context, client *http.Client) ([]Item, error
 				Deleted bool   `json:"deleted"`
 			}
 			if err := json.Unmarshal(data, &story); err != nil {
-				errors[i] = fmt.Errorf("parse Hacker News item %d: %w", id, err)
+				failures[i] = fmt.Errorf("parse Hacker News item %d: %w", id, err)
 				return
 			}
 			title, link := cleanText(story.Title), safeURL(story.URL)
@@ -208,13 +221,21 @@ func (s Source) fetchHN(ctx context.Context, client *http.Client) ([]Item, error
 	}
 	wg.Wait()
 	items := make([]Item, 0)
+	var failed []error
 	for i, item := range results {
-		if errors[i] != nil {
-			return nil, errors[i]
+		if failures[i] != nil {
+			failed = append(failed, failures[i])
 		}
 		if item.ID != "" {
 			items = append(items, item)
 		}
+	}
+	if len(failed) > 0 {
+		cause := errors.Join(failed...)
+		if len(failed) == len(ids) {
+			return nil, fmt.Errorf("all %d story requests failed: %w", len(ids), cause)
+		}
+		return items, &PartialFetchError{Failed: len(failed), Total: len(ids), Cause: cause}
 	}
 	return items, nil
 }

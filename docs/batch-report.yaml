@@ -158,3 +158,122 @@ greeting_follow_up:
   validation: {vet: passed, installation_tests: passed, user_local_reinstall: passed}
   errors: []
   warnings: []
+reliability_milestone:
+  batch_id: B05
+  date: "2026-10-19"
+  completed_tasks: [T015, T016, T017, T018]
+  blocked_tasks: []
+  files_changed:
+    T015:
+      - {file: internal/brief/feed.go, change_type: modified, description: Return completed stories with typed partial failure}
+      - {file: internal/brief/app.go, change_type: modified, description: Merge partial results and schedule 15-minute retry}
+      - {file: internal/brief/model.go, change_type: modified, description: Bounded deduplicated merge and optional per-item retrieval timestamps}
+    T016:
+      - {file: internal/brief/model.go, change_type: modified, description: Choose equal available kinds before unseen preference}
+    T017:
+      - {file: internal/brief/lock.go, change_type: created, description: Bounded state-lock acquisition}
+      - {file: internal/brief/lock_unix.go, change_type: created, description: Kernel locking on macOS and Linux}
+      - {file: internal/brief/lock_other.go, change_type: created, description: Explicit unsupported-platform error}
+      - {file: internal/brief/app.go, change_type: modified, description: Guard transactions and provide read-only no-network fallback}
+      - {file: scripts/test-install.sh, change_type: modified, description: Clean isolated installation lock file after testing}
+    T018:
+      - {file: internal/brief/freshness.go, change_type: created, description: Human-readable cache age and stale detection}
+      - {file: internal/brief/reliability_test.go, change_type: created, description: Regression tests for all four tasks including real subprocesses}
+      - {file: README.md, change_type: modified, description: Document reliability behavior and freshness}
+      - {file: docs/spec.md, change_type: modified, description: Approved reliability acceptance criteria}
+      - {file: docs/architecture.md, change_type: modified, description: Lock and partial-cache design}
+      - {file: docs/testing.md, change_type: modified, description: Reliability test cases}
+      - {file: docs/plan.md, change_type: modified, description: Approved decisions and completed tasks}
+      - {file: docs/checkpoints/tasks-to-impl.yaml, change_type: modified, description: Reliability task traceability}
+      - {file: docs/batch-report.yaml, change_type: modified, description: Verification evidence}
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved T015-T018 decisions}
+      - {artifact: docs/spec.md, used_for: REQ-004 through REQ-008}
+      - {artifact: docs/constitution.md, used_for: User clarification and local-first reliability constraints}
+  evidence_mapping:
+    T015:
+      - {upstream: "docs/plan.md#T015", output: internal/brief/feed.go, evidence: TestHNPartialAndTotalFailure and TestPartialCacheMergeRetryAndRecovery}
+    T016:
+      - {upstream: "docs/plan.md#T016", output: internal/brief/model.go, evidence: TestKindSelectionBeforeUnseenPreference}
+    T017:
+      - {upstream: "docs/plan.md#T017", output: internal/brief/lock.go, evidence: TestConcurrentProcessesAndInterruptedLock TestConcurrentCLIProcesses TestBusyLockSnapshot}
+    T018:
+      - {upstream: "docs/plan.md#T018", output: internal/brief/freshness.go, evidence: TestSelectedCacheFreshness and TestFailedRefreshShowsOldAge}
+  traceability:
+    - {requirement: REQ-005, plan_item: Reliability, task: T015, files: [internal/brief/feed.go, internal/brief/app.go], status: completed}
+    - {requirement: REQ-006, plan_item: Reliability, task: T016, files: [internal/brief/model.go], status: completed}
+    - {requirement: REQ-007, plan_item: Reliability, task: T017, files: [internal/brief/lock.go, internal/brief/lock_unix.go, internal/brief/app.go], status: completed}
+    - {requirement: REQ-005, plan_item: Reliability, task: T018, files: [internal/brief/freshness.go, internal/brief/app.go], status: completed}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Linux amd64 cross-compilation verified; native Linux runtime checks deferred to CI.}
+  test_results:
+    B05:
+      command: go test -race -cover ./...
+      passed: 88
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 94.0
+      timing_sensitive_repetitions: 5
+  validation: {vet: passed, installation_tests: passed, linux_amd64_cross_compile: passed}
+display_milestone:
+  batch_id: B06
+  date: "2026-10-19"
+  completed_tasks: [T019, T020, T021, T022]
+  blocked_tasks: []
+  files_changed:
+    T019:
+      - {file: internal/brief/display.go, change_type: created, description: Terminal detection and grapheme-aware wrapping}
+      - {file: internal/brief/text.go, change_type: modified, description: Preserve emoji ZWJ clusters while stripping terminal controls}
+      - {file: go.mod, change_type: modified, description: Approved terminal and Unicode dependencies}
+      - {file: go.sum, change_type: created, description: Dependency checksums}
+    T020:
+      - {file: internal/brief/app.go, change_type: modified, description: Compact default and explicit detailed display}
+      - {file: internal/brief/brief_test.go, change_type: modified, description: Updated output shape expectations}
+      - {file: internal/brief/greeting_test.go, change_type: modified, description: Plain redirected greetings}
+      - {file: internal/brief/reliability_test.go, change_type: modified, description: Snapshot compact shape expectation}
+      - {file: scripts/test-install.sh, change_type: modified, description: Compact and detailed installed command checks}
+    T021:
+      - {file: internal/brief/display_test.go, change_type: created, description: Output policy Unicode layout and CLI tests}
+    T022:
+      - {file: README.md, change_type: modified, description: Display modes and precedence}
+      - {file: docs/spec.md, change_type: modified, description: Approved REQ-009}
+      - {file: docs/architecture.md, change_type: modified, description: Display design and dependency rationale}
+      - {file: docs/testing.md, change_type: modified, description: Display acceptance cases}
+      - {file: docs/plan.md, change_type: modified, description: Completed milestone and approved decisions}
+      - {file: docs/checkpoints/tasks-to-impl.yaml, change_type: modified, description: T019-T022 traceability}
+      - {file: docs/batch-report.yaml, change_type: modified, description: Display verification record}
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: User-approved T019-T022 choices}
+      - {artifact: docs/spec.md, used_for: REQ-009 and preservation of one-item default}
+  evidence_mapping:
+    T019:
+      - {upstream: "docs/plan.md#T019", output: internal/brief/display.go, evidence: TestWrapProseUnicodeAndWidths and TestResponsiveDisplayPreservesCommandsAndLinks}
+    T020:
+      - {upstream: "docs/plan.md#T020", output: internal/brief/app.go, evidence: TestDisplayCompactDetailedAndPlain and TestCLICompactRedirectAndFlags}
+    T021:
+      - {upstream: "docs/plan.md#T021", output: internal/brief/display.go, evidence: TestDetectDisplayFileAndEnvironment and real PTY checks}
+    T022:
+      - {upstream: "docs/plan.md#T022", output: internal/brief/display.go, evidence: TestDisplayPolicy and PTY NO_COLOR/plain overrides}
+  traceability:
+    - {requirement: REQ-009, plan_item: Display polish, task: T019, files: [internal/brief/display.go, internal/brief/text.go], status: completed}
+    - {requirement: REQ-009, plan_item: Display polish, task: T020, files: [internal/brief/app.go, internal/brief/display.go], status: completed}
+    - {requirement: REQ-009, plan_item: Display polish, task: T021, files: [internal/brief/display.go, internal/brief/display_test.go], status: completed}
+    - {requirement: REQ-009, plan_item: Display polish, task: T022, files: [internal/brief/display.go, internal/brief/display_test.go], status: completed}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Linux cross-compilation passed; native Linux terminal checks remain for CI.}
+  test_results:
+    B06:
+      command: go test -race -cover ./...
+      passed: 105
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 94.1
+  validation: {vet: passed, installation_tests: passed, real_40_column_pty: passed, linux_amd64_cross_compile: passed, user_local_reinstall: passed}

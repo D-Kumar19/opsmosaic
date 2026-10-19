@@ -4,8 +4,8 @@
 
 A personal terminal briefing for DevOps, cloud, security, and AI. Choose your
 interests, get practical tips and current headlines, and follow links to the
-original sources. Built with Go's standard library: no account, API key,
-runtime dependency, or AI subscription.
+original sources. Built in Go with small terminal/Unicode display libraries:
+no account, API key, external runtime, or AI subscription.
 
 ## Install on macOS
 
@@ -119,11 +119,9 @@ Runs greet you with your name, local date/time and timezone, plus a small
 time-aware comment. For example:
 
 ```text
-+-- OpsMosaic ✨ ------------------------------------------------+
-  ☀️ Good morning, <YOUR NAME>!
-  ☕ Need a coffee? Here's a little signal to start your day.
-  🕒 Wednesday, 14 October 2026 | 09:00 CEST
-+---------------------------------------------------------------+
+☀️ Good morning, <YOUR NAME>!
+☕ Need a coffee? Here's a little signal to start your day.
+🕒 Wednesday, 14 October 2026 | 09:00 CEST
 ```
 
 Greetings follow your device's local time:
@@ -143,10 +141,10 @@ Emoji appearance depends on your terminal's font support.
 
 By default,
 each run shows **one random item**: a tip, news headline, or release matching
-your interests. The app prefers unseen items, randomly chooses an available
-content kind, then randomly chooses an item within that kind. This keeps busy
-news feeds from drowning out tips. Once everything available has been shown,
-repeats are allowed rather than hiding useful content.
+your interests. The app chooses equally among available content kinds, then
+randomly chooses an unseen item within that kind when possible. Once all items
+in that kind have been shown, repeats are allowed. This keeps tips eligible
+even when busy news feeds have lots of unseen headlines.
 
 `--tips` and `--news` restrict the random choice; `--topic` restricts interests.
 Only an explicit `--count` greater than one enables a multi-item briefing.
@@ -161,6 +159,9 @@ opsmosaic --offline
 opsmosaic refresh
 opsmosaic config
 opsmosaic --help
+opsmosaic --detailed
+opsmosaic --plain
+opsmosaic --color=never
 ```
 
 `--count` is the maximum total number of items (1-20; default 1), not the number of
@@ -169,6 +170,35 @@ preferences. Topic slugs are:
 `docker,kubernetes,aws,security,helm,argocd,kargo,crossplane,ai`.
 Options follow the optional subcommand. `config` takes no briefing options.
 `refresh` cannot be combined with `--tips` or `--offline`.
+
+### Display modes
+
+Compact output is the default: greeting, rotating comment, local time, content,
+source/date/freshness, and link. `--detailed` adds the application heading,
+terminal-width dividers, and interests/count footer; it does not change how
+many content items are selected.
+
+Prose wraps to the detected terminal width with Unicode grapheme-aware widths
+for emoji, CJK and combining characters. If size detection is unavailable,
+the fallback is 80 columns. Commands and URLs are never split by the renderer,
+so they remain copyable; your terminal may naturally soft-wrap them. An
+individual grapheme wider than an extremely narrow terminal cannot be split.
+
+On capable interactive terminals, headings use cyan, greetings warm yellow,
+and metadata is dimmed. `--color=auto|always|never` controls styling.
+`--plain` disables decorative emoji, borders, and color. Non-TTY output
+(pipes/files), `TERM=dumb`, and missing `TERM` automatically use plain output,
+even with `--color=always`. Plain output retains personalized text and time;
+it does not remove Unicode names or emoji that are part of an article title.
+A nonempty `NO_COLOR` environment variable disables color even with `always`,
+but keeps decorative emoji in interactive output unless `--plain` is also used.
+An empty `NO_COLOR` does not disable color.
+
+```sh
+NO_COLOR=1 opsmosaic
+opsmosaic --detailed --plain
+opsmosaic --tips > briefing.txt
+```
 
 ### Alternative: install using Go directly
 
@@ -211,7 +241,20 @@ External text is sanitized and non-HTTP(S) links are rejected.
 Each source is cached for six hours. Stale sources refresh on a normal run;
 `refresh` bypasses the TTL. Fetches have time and response-size limits.
 Source failures print warnings to stderr and retain older cached items.
-Cached headlines are explicitly labeled. An empty news-only briefing exits
+Individual Hacker News story failures preserve the successful results, merged
+with older cached stories, deduplicated and capped at 100 items. A partial
+fetch prints a warning and retries after 15 minutes rather than six hours;
+`refresh` bypasses that wait. A complete failure leaves the source cache intact.
+
+Cached headlines show their cache age (for example, `cached 2h ago`); they are
+marked `stale` at six hours. Cache age is the last retrieval time, not the
+article's publication age. Older entries retained during a partial fetch keep
+their original retrieval time. Unknown or future cache timestamps are labeled
+`cache age unknown | stale`, rather than treated as fresh. Stale headlines are
+not hidden; selecting one prints a single `opsmosaic refresh` hint on stderr
+per briefing, even when several stale items are shown.
+
+An empty news-only briefing exits
 with an error; a normal briefing can still show a tip with an empty-news
 warning. `--tips` and `--offline` make no network requests.
 
@@ -223,13 +266,22 @@ permissions:
 - macOS defaults: `~/Library/Application Support/opsmosaic/config.json` and
   `~/Library/Caches/opsmosaic/cache.json`.
 - `OPSMOSAIC_HOME=/some/directory` places both files in one chosen directory.
+- A persistent `config.json.lock` file beside the profile coordinates state
+  access on macOS/Linux. Its existence does not mean a process holds the lock;
+  the OS releases the lock when a process exits, even after an abrupt exit.
+  Do not delete this file while OpsMosaic is running.
 
 Your name and interests are not sent to a hosted backend. Selected feed
 providers see normal requests from your IP address. No telemetry is added.
 Corrupt state produces an explicit error; use `config` to replace a bad
-profile, or move a bad cache aside to rebuild it. Concurrent CLI invocations
-can overwrite one another's recent-history updates; atomic writes prevent
-partial files, not multi-process transactions.
+profile, or move a bad cache aside to rebuild it. State updates and refreshes
+hold a cross-process lock. Another invocation waits up to 250 ms, then shows
+a read-only snapshot with a warning: no HTTP requests, history/greeting updates,
+or cache/profile writes. `refresh` also uses this fallback if the lock is busy,
+so check its warning before assuming a refresh happened. Preference editing
+instead fails explicitly when busy; a missing profile never starts a second
+onboarding session while another process holds the lock. This lock support is
+currently limited to macOS/Linux and assumes normal local filesystem semantics.
 
 No shell startup hook is installed. For an opt-in, network-free greeting,
 you can later add `opsmosaic --offline` to your interactive shell setup after
@@ -246,7 +298,8 @@ make test-install
 ```
 
 Tests use temporary directories and `httptest` servers: no live internet,
-external executables, or real user configuration is needed.
+third-party executables, or real user configuration is needed. Concurrency tests
+spawn copies of the Go test executable to verify actual cross-process locking.
 The separate installation test requires Go, `make`, and standard Unix tools;
 it installs into temporary directories, verifies `opsmosaic` through PATH from
 outside the checkout, and cleans up its temporary installation and profile.
@@ -255,6 +308,8 @@ See [test cases](docs/testing.md), [project context](docs/spec.md),
 [architecture](docs/architecture.md), [principles](docs/constitution.md),
 and [implementation TODOs](docs/plan.md).
 
-The first version uses an SSH-friendly numbered picker with emoji greetings
-and no ANSI color escapes. A full-screen picker, color, custom feeds and release packaging are
-tracked in the backlog.
+The topic picker is SSH-friendly and numbered. The renderer uses
+[`x/term`](https://pkg.go.dev/golang.org/x/term) for terminal detection and
+[`uniseg`](https://pkg.go.dev/github.com/rivo/uniseg) for Unicode display widths;
+their Go dependencies are compiled into the standalone executable.
+A full-screen picker, custom feeds and release packaging remain on the backlog.

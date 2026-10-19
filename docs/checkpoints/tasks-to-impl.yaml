@@ -1,13 +1,13 @@
 metadata:
   generated: "2026-10-13"
   source_tasks: docs/plan.md
-  last_updated: "2026-10-14"
+  last_updated: "2026-10-19"
 summary:
-  total_tasks: 14
-  completed_tasks: 14
+  total_tasks: 41
+  completed_tasks: 22
   in_progress_tasks: 0
-  pending_tasks: 0
-  completion_percentage: 100
+  pending_tasks: 19
+  completion_percentage: 53.7
 tasks:
   - task_id: T001
     description: Record project context and contracts
@@ -115,16 +115,92 @@ tasks:
       test_results: {command: "go test -race -cover ./...", passed: 64, failed: 0, skipped: 0, failures: []}
       notes: Core coverage 93.8%; vet, installation tests and user-local reinstall passed.
     upstream_trace: {plan_item: Follow-up personalized greetings, requirements: [REQ-008]}
-pending_tasks: []
+  - task_id: T015
+    description: Preserve partial Hacker News results and retry after 15 minutes
+    status: completed
+    implementation:
+      files_changed: [internal/brief/feed.go, internal/brief/app.go, internal/brief/model.go, internal/brief/reliability_test.go]
+    upstream_trace: {plan_item: Reliability, requirements: [REQ-004, REQ-005]}
+  - task_id: T016
+    description: Choose equal content kinds before unseen preference
+    status: completed
+    implementation:
+      files_changed: [internal/brief/model.go, internal/brief/reliability_test.go]
+    upstream_trace: {plan_item: Reliability, requirements: [REQ-006]}
+  - task_id: T017
+    description: Protect cross-process transactions with bounded snapshot fallback
+    status: completed
+    implementation:
+      files_changed: [internal/brief/lock.go, internal/brief/lock_unix.go, internal/brief/lock_other.go, internal/brief/app.go, internal/brief/reliability_test.go, scripts/test-install.sh]
+    upstream_trace: {plan_item: Reliability, requirements: [REQ-007, REQ-008]}
+  - task_id: T018
+    description: Display truthful retrieval ages and selected-stale refresh hints
+    status: completed
+    implementation:
+      files_changed: [internal/brief/freshness.go, internal/brief/model.go, internal/brief/app.go, internal/brief/reliability_test.go, README.md, docs/spec.md, docs/architecture.md, docs/testing.md, docs/plan.md]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race -cover ./...", passed: 88, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 94.0%; timing-sensitive tests passed five repeated runs. Linux amd64 cross-compilation passed; Linux runtime tests remain for CI.
+    upstream_trace: {plan_item: Reliability, requirements: [REQ-005, REQ-008]}
+  - task_id: T019
+    description: Responsive terminal-width and grapheme-aware prose layout
+    status: completed
+    implementation:
+      files_changed: [internal/brief/display.go, internal/brief/text.go, go.mod, go.sum]
+    upstream_trace: {plan_item: Display polish, requirements: [REQ-009]}
+  - task_id: T020
+    description: Compact by default with explicit detailed view
+    status: completed
+    implementation:
+      files_changed: [internal/brief/display.go, internal/brief/app.go, internal/brief/brief_test.go, internal/brief/greeting_test.go, internal/brief/reliability_test.go, scripts/test-install.sh]
+    upstream_trace: {plan_item: Display polish, requirements: [REQ-009]}
+  - task_id: T021
+    description: Plain output for pipes and explicit plain mode
+    status: completed
+    implementation:
+      files_changed: [internal/brief/display.go, internal/brief/app.go, internal/brief/display_test.go]
+    upstream_trace: {plan_item: Display polish, requirements: [REQ-009]}
+  - task_id: T022
+    description: Accessible automatic color with plain and NO_COLOR precedence
+    status: completed
+    implementation:
+      files_changed: [internal/brief/display.go, internal/brief/display_test.go, README.md, docs/spec.md, docs/architecture.md, docs/testing.md, docs/plan.md]
+    verification:
+      build_passed: true
+      test_results: {command: "go test -race -cover ./...", passed: 105, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 94.1%; real 40-column PTY, redirected output, install tests, vet and Linux cross-compilation passed.
+    upstream_trace: {plan_item: Display polish, requirements: [REQ-009]}
+pending_tasks:
+  - {task_id: T023, status: pending}
+  - {task_id: T024, status: pending}
+  - {task_id: T025, status: pending}
+  - {task_id: T026, status: pending}
+  - {task_id: T027, status: pending}
+  - {task_id: T028, status: pending}
+  - {task_id: T029, status: pending}
+  - {task_id: T030, status: pending}
+  - {task_id: T031, status: pending}
+  - {task_id: T032, status: pending}
+  - {task_id: T033, status: pending}
+  - {task_id: T034, status: pending}
+  - {task_id: T035, status: pending}
+  - {task_id: T036, status: pending}
+  - {task_id: T037, status: pending}
+  - {task_id: T038, status: pending}
+  - {task_id: T039, status: pending}
+  - {task_id: T040, status: pending}
+  - {task_id: T041, status: pending}
 untracked_changes: []
 traceability_chain:
+  - {requirement: REQ-009, tasks: [T019, T020, T021, T022], status: complete}
   - {requirement: REQ-001, tasks: [T002, T003, T006, T013], status: complete}
   - {requirement: REQ-002, tasks: [T002, T003, T006], status: complete}
   - {requirement: REQ-003, tasks: [T002, T004], status: complete}
   - {requirement: REQ-004, tasks: [T002, T004, T005], status: complete}
-  - {requirement: REQ-005, tasks: [T002, T005, T006], status: complete}
-  - {requirement: REQ-006, tasks: [T002, T005, T006, T009], status: complete}
-  - {requirement: REQ-007, tasks: [T002, T003, T004], status: complete}
+  - {requirement: REQ-005, tasks: [T002, T005, T006, T015, T018], status: complete}
+  - {requirement: REQ-006, tasks: [T002, T005, T006, T009, T016], status: complete}
+  - {requirement: REQ-007, tasks: [T002, T003, T004, T017], status: complete}
   - {requirement: REQ-008, tasks: [T002, T007, T008, T010, T011, T012], status: complete}
 validation:
   passed: true

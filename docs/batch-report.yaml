@@ -1,3 +1,20 @@
+draft_release_verification:
+  date: "2026-10-22"
+  completed_tasks: [T027, T030]
+  remaining_tasks: [T035]
+  ci_run: "39756247194"
+  release_run: "39756397057"
+  draft_version: v0.1.0
+  target_commit: "98fd72e272fccdf5608f43402bd09692f6afcbc2"
+  validation:
+    hosted_ci_matrix: passed_all_three_jobs
+    draft_creation: passed
+    four_archives_and_manifest: passed
+    downloaded_asset_checksums: passed
+    linux_amd64_version_smoke: passed
+    is_draft: true
+    public_publication: not_performed
+  next: Finalize T035 materials and request approval before public publication.
 hosted_process_concurrency_test_fix:
   date: "2026-10-22"
   hosted_run: "39754875425"

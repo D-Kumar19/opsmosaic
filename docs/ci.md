@@ -18,6 +18,11 @@ The corrected test passed 50 local race-enabled repetitions and `make ci`;
 the [subsequent hosted run](https://github.com/D-Kumar19/opsmosaic/actions/runs/39753472332)
 passed all three jobs on commit `65b9a64`. T027 is complete.
 
+The [latest verified run](https://github.com/D-Kumar19/opsmosaic/actions/runs/39756247194)
+also passed all three jobs on commit `98fd72e`, including the corrected
+subprocess read-only-fallback test. That exact commit produced the verified
+`v0.1.0` draft release.
+
 ## Configured matrix
 
 | Runner | Go | Checks |

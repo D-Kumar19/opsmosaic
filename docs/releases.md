@@ -9,6 +9,12 @@ rights to third-party article bodies. Releases require maintainer approval.
 Target initial version: `v0.1.0`. No tag or release exists merely because that
 version appears in documentation or local test artifacts.
 
+Verified draft `v0.1.0` targets commit `98fd72e`; [workflow run
+39756397057](https://github.com/D-Kumar19/opsmosaic/actions/runs/39756397057)
+uploaded four archives and `SHA256SUMS`, downloaded and checked them, and ran
+the Linux amd64 version smoke test. It remains a draft, not a public release.
+Final release materials and publication approval are tracked by T035.
+
 | Target | Packaging target | Runtime verification |
 |---|---|---|
 | macOS arm64 | Yes | Local development/test host and hosted macOS CI |

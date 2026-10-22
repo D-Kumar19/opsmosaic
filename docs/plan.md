@@ -242,7 +242,7 @@ standalone command; personal profile/cache were not used for verification.
   Local runtime verified only on macOS arm64 with Go 1.27.2; other targets
   cross-built, Go 1.24/native matrix not yet verified.
   Dependencies: T025.
-- [ ] **T030 [P1] Automate downloadable releases and checksums.**
+- [x] **T030 [P1] Automate downloadable releases and checksums.**
   Build versioned macOS arm64/amd64 and approved Linux binaries, package them
   with relevant documentation/license, and generate checksums.
   Test metadata, archive layout, checksum verification, and standalone
@@ -258,8 +258,9 @@ standalone command; personal profile/cache were not used for verification.
   checks successful CI for the exact commit, rejects reused versions, packages
   and downloads four archives/checksums, and verifies the native Linux binary.
   Commit/push and one remote draft verification are approved.
-  **Outstanding:** verify the workflow's remote draft and assets. No public
-  release is authorized.
+  **Verified:** run 39756397057 created draft `v0.1.0` for commit 98fd72e,
+  downloaded all five assets, verified checksums and native Linux amd64 version.
+  CI run 39756247194 passed all three jobs. No public release is authorized.
   Dependencies: T026, T027, T028, T029.
 
 ### Community and portfolio presentation
@@ -293,9 +294,9 @@ standalone command; personal profile/cache were not used for verification.
   no unsupported CV claims or automatic publishing.
   **Prepared locally:** `docs/project-summary.md`, `docs/release-notes.md`,
   README demo links and honest measurements/platform limitations.
-  **Blocked:** T030 release prerequisite (including T027 CI) remains unmet;
-  real release/tag/push/upload still needs separate approval. Drafts are not
-  presented as an available release.
+  **Ready to finish:** T027 and T030 are complete; a verified `v0.1.0` draft
+  exists. Finalize notes/changelog/support claims and obtain approval before
+  public publication. The draft is not an available public release.
   Dependencies: T015, T016, T017, T018, T030, T033, T034.
 
 ### Optional product enhancements

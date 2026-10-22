@@ -4,12 +4,12 @@ metadata:
   last_updated: "2026-10-22"
 summary:
   total_tasks: 39
-  completed_tasks: 37
+  completed_tasks: 38
   in_progress_tasks: 0
   pending_tasks: 1
-  blocked_tasks: 1
+  blocked_tasks: 0
   cancelled_tasks: 0
-  completion_percentage: 94.9
+  completion_percentage: 97.4
 tasks:
   - task_id: T001
     description: Record project context and contracts
@@ -292,21 +292,20 @@ tasks:
     local_implementation: [.github/workflows/ci.yml, scripts/ci.sh, Makefile, docs/ci.md]
     verification: Hosted run 39753472332 passed all three jobs on commit 65b9a64, including isolated deliberate formatting-failure assertions in release tests. Run 39752877495 proved real test failures fail the hosted job.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
-pending_tasks:
   - task_id: T030
-    status: pending
-    reason: Manual draft-release workflow implemented; remote draft verification next. Public publication requires approval.
+    status: completed
     local_implementation: [.github/workflows/release.yml, scripts/release.sh, scripts/test-release.sh, Makefile, .gitignore, docs/releases.md]
-    verification: Four cross-built archives and native arm64 smoke passed; metadata/licenses/checksums/tamper and failure guards verified in isolated repository.
+    verification: Hosted run 39756397057 created draft v0.1.0 targeting 98fd72e, downloaded all five assets, verified checksums and native Linux amd64 version. CI run 39756247194 passed all three jobs. Public publication remains unapproved.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
-blocked_tasks:
+pending_tasks:
   - task_id: T035
-    status: blocked
-    reason: T030 and its CI prerequisite remain unmet; no real release authorized.
+    status: pending
+    reason: CI and draft automation are verified; finalize release notes, changelog and presentation, then obtain publication approval.
     local_implementation: [docs/release-notes.md, docs/project-summary.md, README.md]
     verification: Drafts distinguish measured results from cross-build/remote-CI limitations; no release claimed.
     upstream_trace: {plan_item: Project presentation, requirements: [REQ-011]}
 untracked_changes: []
+blocked_tasks: []
 traceability_chain:
   - {requirement: REQ-019, tasks: [T040], status: complete}
   - {requirement: REQ-018, tasks: [T039], status: complete}
@@ -316,7 +315,7 @@ traceability_chain:
   - {requirement: REQ-012, tasks: [T023], status: complete}
   - {requirement: REQ-013, tasks: [T024], status: complete}
   - {requirement: REQ-011, tasks: [T034, T035], status: partial}
-  - {requirement: REQ-010, tasks: [T025, T026, T027, T028, T029, T030, T033], status: partial}
+  - {requirement: REQ-010, tasks: [T025, T026, T027, T028, T029, T030, T033], status: complete}
   - {requirement: REQ-009, tasks: [T019, T020, T021, T022], status: complete}
   - {requirement: REQ-001, tasks: [T002, T003, T006, T013], status: complete}
   - {requirement: REQ-002, tasks: [T002, T003, T006], status: complete}
@@ -332,5 +331,4 @@ validation:
   warnings:
     - All three CI jobs passed; remaining native architectures must not be claimed as runtime-certified.
   blocking_issues:
-    - T030 requires release integration, draft verification and explicit publication approval.
-    - T035 drafts prepared but release prerequisite T030 remains blocked.
+    - T035 final materials and explicit public publication approval remain outstanding.

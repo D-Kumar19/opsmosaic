@@ -4,11 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
+
+	"golang.org/x/term"
 )
 
-func Onboard(input *bufio.Reader, out io.Writer) (Profile, error) {
+func Onboard(source io.Reader, out io.Writer) (Profile, error) {
+	input := bufio.NewReader(source)
 	p := Profile{Version: 1}
 	fmt.Fprintln(out, "\nWelcome to OpsMosaic - your personal tech briefing.")
 	for {
@@ -25,6 +29,14 @@ func Onboard(input *bufio.Reader, out io.Writer) (Profile, error) {
 			continue
 		}
 		break
+	}
+	if file, ok := source.(*os.File); ok && terminalPickerAvailable(file, out) {
+		if topics, err := pickTopics(input, file, out, p.Name); err != nil {
+			return p, err
+		} else {
+			p.Topics = topics
+			return p, p.Validate()
+		}
 	}
 	fmt.Fprintln(out, "\nChoose your interests:")
 	for i, topic := range Topics {
@@ -57,6 +69,15 @@ func Onboard(input *bufio.Reader, out io.Writer) (Profile, error) {
 		p.Topics = selected
 		return p, p.Validate()
 	}
+}
+
+func terminalPickerAvailable(input *os.File, out io.Writer) bool {
+	output, ok := out.(*os.File)
+	if !pickerPlatformSupported() || !ok || !term.IsTerminal(int(input.Fd())) || !term.IsTerminal(int(output.Fd())) {
+		return false
+	}
+	terminal := strings.ToLower(os.Getenv("TERM"))
+	return terminal != "" && terminal != "dumb"
 }
 
 func readLine(input *bufio.Reader) (string, error) {

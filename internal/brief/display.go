@@ -16,6 +16,7 @@ type displayOptions struct {
 	Detailed bool
 	Plain    bool
 	Color    bool
+	Saved    bool
 }
 
 func resolveDisplay(width int, tty bool, terminal, noColor string, plain, detailed bool, color string) displayOptions {
@@ -112,17 +113,21 @@ func renderDisplay(out io.Writer, name string, topics []string, items []Item, no
 		prose("OpsMosaic", "", "36")
 		border()
 	}
-	title, comment := greeting(name, now, visit)
-	if options.Plain {
-		title, comment = plainGreeting(title), plainGreeting(comment)
+	if options.Saved {
+		prose("Saved content | captured "+now.Format(time.RFC3339)+" | not live news", "", "2")
+	} else {
+		title, comment := greeting(name, now, visit)
+		if options.Plain {
+			title, comment = plainGreeting(title), plainGreeting(comment)
+		}
+		prose(title, "", "33")
+		prose(comment, "", "2")
+		stamp := now.Format("Monday, 02 January 2006 | 15:04 MST")
+		if !options.Plain {
+			stamp = "🕒 " + stamp
+		}
+		prose(stamp, "", "2")
 	}
-	prose(title, "", "33")
-	prose(comment, "", "2")
-	stamp := now.Format("Monday, 02 January 2006 | 15:04 MST")
-	if !options.Plain {
-		stamp = "🕒 " + stamp
-	}
-	prose(stamp, "", "2")
 	border()
 	for _, item := range items {
 		b.WriteByte('\n')
@@ -137,7 +142,7 @@ func renderDisplay(out io.Writer, name string, topics []string, items []Item, no
 		if !item.Published.IsZero() {
 			metadata += " | " + item.Published.In(now.Location()).Format("02 Jan 2006 15:04 MST")
 		}
-		if item.Cached {
+		if item.Cached && !options.Saved {
 			label, _ := cacheFreshness(item, now)
 			metadata += " | " + label
 		}
@@ -146,7 +151,7 @@ func renderDisplay(out io.Writer, name string, topics []string, items []Item, no
 			fmt.Fprintln(&b, "  "+link)
 		}
 	}
-	if options.Detailed {
+	if options.Detailed && !options.Saved {
 		var labels []string
 		for _, topic := range topics {
 			labels = append(labels, topicName(topic))

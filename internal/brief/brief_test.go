@@ -666,8 +666,8 @@ func TestCLIExplicitMixedCount(t *testing.T) {
 	a.Sources = []Source{{ID: "aws", Topic: "aws", Kind: "news"}}
 	cache := Cache{Version: 1, Sources: map[string]SourceCache{
 		"aws": {Fetched: a.Now(), Items: []Item{
-			{ID: "one", Kind: "news", Topic: "aws", URL: "https://example.com/1"},
-			{ID: "two", Kind: "news", Topic: "aws", URL: "https://example.com/2"},
+			{ID: "one", Kind: "news", Topic: "aws", Title: "First article", URL: "https://example.com/1"},
+			{ID: "two", Kind: "news", Topic: "aws", Title: "Second article", URL: "https://example.com/2"},
 		}},
 	}}
 	if err := writeJSON(a.Store.CachePath, cache); err != nil {

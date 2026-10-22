@@ -14,6 +14,12 @@ type Store struct {
 }
 
 func DefaultStore() (Store, error) {
+	if config, cache := os.Getenv("OPSMOSAIC_CONFIG_PATH"), os.Getenv("OPSMOSAIC_CACHE_PATH"); config != "" || cache != "" {
+		if !filepath.IsAbs(config) || !filepath.IsAbs(cache) {
+			return Store{}, fmt.Errorf("OPSMOSAIC_CONFIG_PATH and OPSMOSAIC_CACHE_PATH must both be absolute paths")
+		}
+		return Store{config, cache}, nil
+	}
 	if home := os.Getenv("OPSMOSAIC_HOME"); home != "" {
 		return Store{filepath.Join(home, "config.json"), filepath.Join(home, "cache.json")}, nil
 	}

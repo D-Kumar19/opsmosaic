@@ -168,8 +168,8 @@ func TestSelectedCacheFreshness(t *testing.T) {
 			}
 			a.Sources = []Source{{ID: "aws", Topic: "aws", Kind: "news"}}
 			items := []Item{
-				{ID: "one", Kind: "news", Topic: "aws", URL: "https://example.com/one"},
-				{ID: "two", Kind: "news", Topic: "aws", URL: "https://example.com/two"},
+				{ID: "one", Kind: "news", Topic: "aws", Title: "First article", URL: "https://example.com/one"},
+				{ID: "two", Kind: "news", Topic: "aws", Title: "Second article", URL: "https://example.com/two"},
 			}
 			cache := Cache{Version: 1, Sources: map[string]SourceCache{"aws": {Fetched: stamp, Items: items}}}
 			if err := writeJSON(a.Store.CachePath, cache); err != nil {
@@ -364,7 +364,7 @@ func TestFailedRefreshShowsOldAge(t *testing.T) {
 	defer srv.Close()
 	a.Sources = []Source{{ID: "aws", Name: "AWS", Topic: "aws", Kind: "news", URL: srv.URL}}
 	cache := Cache{Version: 1, Sources: map[string]SourceCache{
-		"aws": {Fetched: a.Now().Add(-48 * time.Hour), Items: []Item{{ID: "old", Kind: "news", Topic: "aws", URL: "https://example.com/old"}}},
+		"aws": {Fetched: a.Now().Add(-48 * time.Hour), Items: []Item{{ID: "old", Kind: "news", Topic: "aws", Title: "Old article", URL: "https://example.com/old"}}},
 	}}
 	if err := writeJSON(a.Store.CachePath, cache); err != nil {
 		t.Fatal(err)

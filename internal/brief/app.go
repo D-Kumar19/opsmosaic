@@ -1,7 +1,6 @@
 package brief
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"flag"
@@ -35,6 +34,18 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warnings io.Writer) (runErr error) {
+	if len(args) > 0 && (args[0] == "replay" || args[0] == "bookmarks") {
+		return a.savedCommand(ctx, args, out, warnings)
+	}
+	if len(args) > 0 && args[0] == "feeds" {
+		return a.feedsCommand(ctx, args[1:], out, warnings)
+	}
+	if len(args) > 0 && args[0] == "doctor" {
+		return a.doctor(ctx, args[1:], out, warnings)
+	}
+	if len(args) > 0 && (args[0] == "shell" || args[0] == "schedule") {
+		return a.integration(ctx, args, in, out, warnings)
+	}
 	command := ""
 	if len(args) > 0 && (args[0] == "config" || args[0] == "refresh") {
 		command, args = args[0], args[1:]
@@ -43,6 +54,7 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	flags.SetOutput(warnings)
 	tipsOnly := flags.Bool("tips", false, "show only bundled tips (no network)")
 	newsOnly := flags.Bool("news", false, "show only news and releases")
+	stableOnly := flags.Bool("stable-only", false, "exclude prerelease and unknown release labels; leave news/tips unchanged")
 	offline := flags.Bool("offline", false, "use cache without network requests")
 	topic := flags.String("topic", "", "comma-separated topic slugs for this run")
 	count := flags.Int("count", 1, "maximum total items, 1-20")
@@ -53,8 +65,14 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	flags.Usage = func() {
 		fmt.Fprintln(out, "OpsMosaic - a personal DevOps, cloud, security and AI briefing")
 		fmt.Fprintln(out, "\nUsage: opsmosaic [config|refresh] [options]")
+		fmt.Fprintln(out, "  shell install|uninstall zsh|bash FILE; shell greeting")
+		fmt.Fprintln(out, "  schedule enable|disable|status (macOS, refresh every 3 hours)")
+		fmt.Fprintln(out, "  doctor [--json] Read-only local diagnostics; no network or state writes")
+		fmt.Fprintln(out, "  feeds add|list|remove Manage additive custom RSS/Atom feeds; feeds --help")
+		fmt.Fprintln(out, "  replay; bookmarks add|list|show|remove Save/replay content; bookmarks --help")
 		fmt.Fprintln(out, "  --tips          Bundled tips only; no network")
 		fmt.Fprintln(out, "  --news          News and releases only")
+		fmt.Fprintln(out, "  --stable-only   Only recognized stable RELEASE versions; tips/news unchanged")
 		fmt.Fprintln(out, "  --offline       Use local cache; no network")
 		fmt.Fprintln(out, "  --topic SLUGS   Override interests for this run")
 		fmt.Fprintln(out, "  --count N       Maximum total items (1-20; default 1)")
@@ -131,7 +149,7 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 		return fmt.Errorf("setup is in progress in another terminal; run opsmosaic again when it finishes")
 	}
 	if command == "config" || os.IsNotExist(err) {
-		profile, err = Onboard(bufio.NewReader(in), out)
+		profile, err = Onboard(in, out)
 		if err != nil {
 			return err
 		}
@@ -153,11 +171,25 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	if err != nil {
 		return err
 	}
+	var saved SavedState
+	if !readOnly {
+		saved, err = a.Store.saved()
+		if err != nil {
+			return err
+		}
+	}
 	now := a.Now()
 	var items []Item
 	if !*tipsOnly {
+		app, err := a.withCustomFeeds()
+		if err != nil {
+			return err
+		}
 		var notes []string
-		items, notes = a.news(ctx, &cache, topics, now, command == "refresh", *offline || readOnly)
+		items, notes = app.news(ctx, &cache, topics, now, command == "refresh", *offline || readOnly)
+		if *stableOnly {
+			items = stableItems(items)
+		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
@@ -166,6 +198,9 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 		}
 		if len(items) == 0 {
 			message := "No news available for these topics. Try opsmosaic refresh when online, or --tips."
+			if *stableOnly {
+				message = "No news or recognized stable releases available with --stable-only. Omit --stable-only to include prerelease/unknown releases, refresh when online, or use --tips."
+			}
 			if *newsOnly {
 				if !readOnly {
 					if err := writeJSON(a.Store.CachePath, cache); err != nil {
@@ -200,6 +235,11 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if !readOnly {
+		if err := validSavedBriefing(SavedBriefing{CapturedAt: now, Items: chosen}); err != nil {
+			return fmt.Errorf("cannot save selected briefing: %w", err)
+		}
+	}
 	display := detectDisplay(out, *plain, *detailed, *color)
 	if err := renderDisplay(out, profile.Name, topics, chosen, now, cache.GreetingVisits, display); err != nil {
 		return err
@@ -215,7 +255,14 @@ func (a *App) Run(ctx context.Context, args []string, in io.Reader, out, warning
 	}
 	cache.Recent = remember(cache.Recent, chosen)
 	cache.GreetingVisits++
-	return writeJSON(a.Store.CachePath, cache)
+	if err := writeJSON(a.Store.CachePath, cache); err != nil {
+		return err
+	}
+	saved.Last = &SavedBriefing{CapturedAt: now, Items: chosen}
+	if err := a.Store.writeSaved(saved); err != nil {
+		return fmt.Errorf("briefing displayed and cache updated, but saving replay failed: %w", err)
+	}
+	return nil
 }
 
 func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.Time, refresh, offline bool) ([]Item, []string) {
@@ -237,6 +284,7 @@ func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.
 	}
 	results := make([]result, len(sources))
 	var wg sync.WaitGroup
+	limit := make(chan struct{}, 9)
 	for i, source := range sources {
 		cached, exists := cache.Sources[source.ID]
 		age := now.Sub(cached.Fetched)
@@ -251,6 +299,13 @@ func (a *App) news(ctx context.Context, cache *Cache, topics []string, now time.
 		wg.Add(1)
 		go func(i int, source Source) {
 			defer wg.Done()
+			select {
+			case limit <- struct{}{}:
+				defer func() { <-limit }()
+			case <-ctx.Done():
+				results[i] = result{source: source, err: ctx.Err()}
+				return
+			}
 			fetchCtx, cancel := context.WithTimeout(ctx, 12*time.Second)
 			defer cancel()
 			items, err := source.Fetch(fetchCtx, a.Client)

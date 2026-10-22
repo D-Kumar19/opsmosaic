@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"regexp"
 	"strings"
@@ -29,12 +30,13 @@ func (e *PartialFetchError) Error() string {
 func (e *PartialFetchError) Unwrap() error { return e.Cause }
 
 type Source struct {
-	ID     string
-	Name   string
-	Topic  string
-	Kind   string
-	URL    string
-	Format string
+	ID         string
+	Name       string
+	Topic      string
+	Kind       string
+	URL        string
+	Format     string
+	PublicOnly bool
 }
 
 func DefaultSources() []Source {
@@ -52,6 +54,14 @@ func DefaultSources() []Source {
 }
 
 func (s Source) Fetch(ctx context.Context, client *http.Client) ([]Item, error) {
+	if s.PublicOnly {
+		if _, err := publicFeedURL(s.URL); err != nil {
+			return nil, err
+		}
+		transport := publicFeedTransport(net.DefaultResolver.LookupIPAddr, (&net.Dialer{Timeout: 5 * time.Second}).DialContext)
+		defer transport.CloseIdleConnections()
+		client = publicFeedClient(transport)
+	}
 	if s.Format == "hn" {
 		return s.fetchHN(ctx, client)
 	}

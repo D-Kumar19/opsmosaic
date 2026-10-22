@@ -102,12 +102,29 @@ they are not signatures or publisher authentication. Optional
 no approved production signing identity. Builds include a real
 build timestamp; byte-for-byte reproducible archives are not claimed.
 
+## Refreshing an unpublished draft
+
+The existing `v0.1.0` draft was built before the final release documentation.
+Do not publish its old assets after committing updated release materials.
+
+1. Commit/push the final materials and wait for all CI jobs on that commit.
+2. In GitHub Releases, confirm `v0.1.0` is still a **draft**, then delete that
+   draft and its assets. Do not delete or move a published release/tag.
+3. Run **Draft release** again on `main` with `v0.1.0`. The workflow refuses
+   existing releases and tags, so the old unpublished draft must be removed first.
+4. Verify the new run succeeds and its target is the final documentation commit.
+   Review the notes and archives, then publish when ready.
+
+If publication happens on another date, update the changelog date before the
+final build. For subsequent releases, update the release-note document for the
+chosen version before dispatching; the workflow copies that document verbatim.
+
 ## Approval gates
 
 Before an actual release:
 
 1. Confirm repository access and the maintainer-approved artifact destination.
-2. Unblock [CI](ci.md), run the Go/OS matrix, and review failing checks.
+2. Verify [CI](ci.md) passed for the exact release commit.
 3. Validate archives, dependency notices, checksums and native platform behavior.
 4. Move appropriate changelog entries into a dated version section.
 5. Prepare and verify a draft using the manual workflow above.
@@ -123,5 +140,5 @@ A clean-tree requirement prevents packaging uncommitted code.
 
 [Draft release notes](release-notes.md) and a [project summary](project-summary.md)
 are prepared for maintainer review, with the [terminal demo](demo/README.md).
-These materials do not satisfy the outstanding runner/native-test gates or
-authorize a release.
+These materials record verified CI and explicit cross-build limitations.
+Public publication remains a separate maintainer action.

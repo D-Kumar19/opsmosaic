@@ -286,7 +286,7 @@ standalone command; personal profile/cache were not used for verification.
   with no text overflow. Regeneration uses Python stdlib and macOS Swift/AppKit,
   adding no production dependency. See `docs/demo/README.md`.
   Dependencies: T019, T020, T021.
-- [ ] **T035 [P2] Prepare the initial release and portfolio summary.**
+- [x] **T035 [P2] Prepare the initial release and portfolio summary.**
   Write concise release notes, architecture/design trade-offs, and an accurate
   CV/project description. Include only measured test/performance/adoption data.
   Verify install links and declared features; tag/publish only on approval.
@@ -294,9 +294,10 @@ standalone command; personal profile/cache were not used for verification.
   no unsupported CV claims or automatic publishing.
   **Prepared locally:** `docs/project-summary.md`, `docs/release-notes.md`,
   README demo links and honest measurements/platform limitations.
-  **Ready to finish:** T027 and T030 are complete; a verified `v0.1.0` draft
-  exists. Finalize notes/changelog/support claims and obtain approval before
-  public publication. The draft is not an available public release.
+  **Completed 2026-10-22:** final release notes, dated changelog, source/binary
+  install guidance and measured CI/platform claims are prepared. T027 and T030
+  are complete. Commit these final materials, rebuild the unpublished draft
+  with them, and review before maintainer publication. No public release claimed.
   Dependencies: T015, T016, T017, T018, T030, T033, T034.
 
 ### Optional product enhancements
@@ -388,8 +389,8 @@ standalone command; personal profile/cache were not used for verification.
 1. **Reliability:** T015-T018.
 2. **Display polish:** T019-T022.
 3. **Release foundations:** T025-T030 and T033.
-4. **Presentation/release preparation:** T034 complete, T035 drafts ready
-   but release gated; external publication not authorized.
+4. **Presentation/release preparation:** T034-T035 complete; final materials
+   must be committed and included in refreshed draft assets before publication.
 5. **Optional work:** T023-T024 and T036-T041 complete
    (T041 is evaluation-only; no AI code).
 

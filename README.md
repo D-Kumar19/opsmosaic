@@ -20,7 +20,9 @@ warning because no news cache is seeded.
 
 ## Install on macOS
 
-Works on Apple Silicon and Intel Macs. Building requires Go 1.24 or newer and
+Targets Apple Silicon and Intel Macs; native runtime checks cover Apple Silicon.
+Intel archives are cross-built, not native-runtime-certified.
+Building requires Go 1.24 or newer and
 `make`. The installed executable is standalone: Go is not needed to run it.
 
 ### 1. Install build tools
@@ -71,11 +73,7 @@ opsmosaic
 
 For bash, put the same PATH line in `~/.bash_profile` and reload that file.
 
-### Homebrew tap status
-
-Homebrew above installs the Go build tool, not OpsMosaic itself. There is
-**no OpsMosaic tap planned**, so no `brew tap` / `brew install opsmosaic`
-command is advertised as working. `make install` is the supported path.
+Homebrew above installs the Go build tool, not OpsMosaic itself.
 
 ### Updating, custom locations, and uninstalling
 
@@ -385,7 +383,8 @@ The renderer uses
 [`x/term`](https://pkg.go.dev/golang.org/x/term) for terminal detection and
 [`uniseg`](https://pkg.go.dev/github.com/rivo/uniseg) for Unicode display widths;
 their Go dependencies are compiled into the standalone executable.
-Custom feeds are supported; remote CI and release publishing remain outstanding.
+Custom feeds are supported. GitHub Actions CI and draft-release automation are
+verified; public publication remains a separate maintainer action.
 
 ## Versioning, releases, and contributions
 
@@ -394,15 +393,18 @@ OpsMosaic is a personal project hosted at
 Source builds report `dev`; `opsmosaic --version`
 shows version, commit and build time without onboarding or network requests.
 
-`v0.1.0` is the proposed first release, not an existing tag. Local archives for
+`v0.1.0` is prepared as a draft, not yet a public release. After publication,
+download binaries from [GitHub Releases](https://github.com/D-Kumar19/opsmosaic/releases).
+See [binary installation](docs/release-notes.md#installation) for archive and
+checksum instructions. Local archives for
 macOS/Linux arm64/amd64 can be generated from a clean committed checkout using
 `make release VERSION=v0.1.0`. Packaging does not tag, push or upload anything.
 See [release policy and verification](docs/releases.md) before distribution.
 Cross-compiled targets are not yet native-runtime-certified.
 
-`make ci` runs portable checks locally. Remote GitHub Actions wiring and
-successful/failing run verification are still outstanding; there is no live CI badge or claimed
-remote matrix result. See [CI readiness](docs/ci.md).
+`make ci` runs portable checks locally. GitHub Actions tests Linux on Go 1.24
+and latest stable, and macOS on latest stable. All three jobs passed; hosted
+tests verify deliberate formatting rejection too. See [CI evidence](docs/ci.md).
 
 See [contributor instructions](CONTRIBUTING.md), [changelog](CHANGELOG.md),
 and the [MIT source-code license](LICENSE). The code license does not cover

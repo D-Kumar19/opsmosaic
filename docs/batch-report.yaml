@@ -1,3 +1,15 @@
+initial_release_materials:
+  date: "2026-10-22"
+  completed_tasks: [T035]
+  remaining_tasks: []
+  changes:
+    - Dated v0.1.0 changelog and final release highlights.
+    - Binary checksum/extraction/installation and tagged source installation.
+    - Verified hosted CI evidence with explicit untested-native-target limitations.
+    - Draft refresh instructions requiring final committed materials in archives.
+  runtime_changes: false
+  public_publication: not_performed
+  remaining_maintainer_actions: Commit/push final materials, wait for CI, replace only the unpublished draft, verify refreshed assets and publish after review.
 draft_release_verification:
   date: "2026-10-22"
   completed_tasks: [T027, T030]

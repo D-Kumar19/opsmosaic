@@ -1,9 +1,12 @@
 # Changelog
 
 Notable changes are recorded here in a Keep a Changelog-style format.
-Versions follow Semantic Versioning. No release has been tagged yet.
+Versions follow Semantic Versioning. The initial release is prepared below;
+it becomes available only when the maintainer publishes the GitHub draft.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-10-22
 
 ### Added
 
@@ -27,6 +30,8 @@ Versions follow Semantic Versioning. No release has been tagged yet.
   original source/capture metadata, no-network saved output and no eviction.
 - Interactive arrow-key topic selection with Space/Enter, live resize support,
   cancellation without profile loss, and a numbered non-TTY fallback.
+- GitHub Actions checks on Linux Go 1.24/latest and macOS latest, plus a
+  manually triggered draft-release workflow with downloaded-asset verification.
 
 ### Changed
 
@@ -34,7 +39,3 @@ Versions follow Semantic Versioning. No release has been tagged yet.
 - Use `io.github.d-kumar19.opsmosaic.refresh` for new macOS refresh agents.
   Disable any differently named existing job with its previous build before
   enabling the new identifier.
-
-### Planned release
-
-- Target: `v0.1.0`, pending runner verification and manual release approval.

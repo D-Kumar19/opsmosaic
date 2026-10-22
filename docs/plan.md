@@ -37,7 +37,6 @@ T006 follows T005; T007 follows T006; T008 follows T007.
 | REQ-011 | T034, T035 | Actual isolated terminal GIF/transcript, demo-tool tests, project summary and draft notes; release gate remains blocked |
 | REQ-012 | T023 | Hook lifecycle, backup/preservation, skip/error behavior and real bash/zsh PTY tests |
 | REQ-013 | T024 | Three-hour plist, simulated launchctl lifecycle, cache-only fetch/failure/locking tests |
-| REQ-014 | T032 | Disposable-key signing and tamper/trust tests; real release signing remains blocked |
 | REQ-015 | T037 | Read-only diagnostics, redaction/JSON contract, cache ages and standalone-command tests |
 | REQ-016 | T036 | Additive feed commands, migration/cache/offline/concurrency tests and guarded TLS/DNS/redirect fixtures |
 | REQ-017 | T038 | Version/tag classification, actual feed fixture, custom offline/refresh cache preservation, empty-result and installed flag tests |
@@ -55,10 +54,10 @@ progress; recording tasks does not approve a design, publication, or release.
   first milestone (Reliability, T015-T018), then the second milestone
   (Display polish, T019-T022), and then release foundations
   (T025-T030, T033), then presentation materials (T034-T035).
-  T031 was explicitly cancelled; optional tasks are authorized individually.
-- The user subsequently approved T023/T024 and the local-tooling portion of
-  T032. Shell edits and scheduler activation on the actual machine remain
-  opt-in; real signing remains blocked as explicitly agreed.
+  Optional tasks are authorized individually.
+- Shell edits and scheduler activation on the actual machine remain opt-in.
+  Homebrew and production signing are outside the project scope and are not
+  tracked as future work.
 - Before implementing a task, ask the user about unresolved behavior, scope,
   or design decisions using the clarification form. Do not silently choose
   between materially different approaches.
@@ -209,7 +208,7 @@ standalone command; personal profile/cache were not used for verification.
   source licensing does not grant rights to third-party article bodies or
   replace release approval.
   Dependencies: T025.
-- [ ] **T027 [P1] Add continuous integration.**
+- [x] **T027 [P1] Add continuous integration.**
   Automate formatting checks, unit tests, race tests, vet, build, and isolated
   installation tests. Set a supported Go/OS matrix and useful failure output.
   Verify the chosen runner executes the commands and a deliberate failure
@@ -220,9 +219,11 @@ standalone command; personal profile/cache were not used for verification.
   cancellation, Linux packaging/signing-tool/demo tests and macOS PTY tests.
   The minimum Go version runs on Linux only to conserve included minutes.
   Actions is enabled according to the maintainer.
-  **Outstanding:** verified successful and intentional failing remote runs.
-  `make ci` and deliberate local formatting failure pass verification;
-  remote wiring and real success/failure runs remain outstanding. See `docs/ci.md`.
+  **Verified:** hosted run 39753472332 passed all three jobs on commit
+  65b9a64. Its Linux release tests deliberately introduce unformatted code in
+  an isolated fixture and require CI to return nonzero. Run 39752877495 also
+  demonstrated that a real test failure fails the hosted job. No additional
+  failing pull request is needed. See `docs/ci.md`.
   Dependencies: T025.
 - [x] **T028 [P1] Add version/build metadata.**
   Implement `opsmosaic --version` with a development fallback and release
@@ -252,25 +253,14 @@ standalone command; personal profile/cache were not used for verification.
   publication approval required; artifact-host integration deferred.
   **Locally implemented and verified:** `make test-release`, including all
   archive contents/metadata, native smoke, tampering and failure guards.
-  **Blocked:** T027 remote/native CI prerequisite; real distribution/tagging
-  also requires artifact destination and explicit approval. No release uploaded.
+  **Approved 2026-10-22:** manual Actions dispatch creates a draft GitHub
+  Release only; the maintainer publishes after review. Workflow implementation
+  checks successful CI for the exact commit, rejects reused versions, packages
+  and downloads four archives/checksums, and verifies the native Linux binary.
+  Commit/push and one remote draft verification are approved.
+  **Outstanding:** verify the workflow's remote draft and assets. No public
+  release is authorized.
   Dependencies: T026, T027, T028, T029.
-- **T031 [P2] Publish a real Homebrew tap — CANCELLED.**
-  **User decision 2026-10-19:** no tap needed; existing `make install` is
-  sufficient. No formula, tap repository or Homebrew release is planned.
-  Retained for task-history traceability, not counted as open or completed.
-- [ ] **T032 [P3] Add signing/provenance where appropriate.**
-  Evaluate release signatures, provenance, and macOS signing/notarization;
-  implement only approved measures with credentials kept out of the repo.
-  Test verification steps, tampered artifacts, and unsigned failure modes.
-  **Approved 2026-10-19:** prepare optional local OpenSSH artifact
-  signing/verification using disposable test keys; keep real signing blocked.
-  Local scripts sign the checksum manifest, verify trusted identity/namespace
-  then hashes, reject tampering/unsafe paths/overwrite, and never publish.
-  **Blocked:** T030 release prerequisite and approved production trust/key
-  management. No real signature, provenance attestation or Apple signing.
-  See `docs/signing.md`.
-  Dependencies: T030.
 
 ### Community and portfolio presentation
 
@@ -398,9 +388,9 @@ standalone command; personal profile/cache were not used for verification.
 2. **Display polish:** T019-T022.
 3. **Release foundations:** T025-T030 and T033.
 4. **Presentation/release preparation:** T034 complete, T035 drafts ready
-   but release gated. T031 cancelled; external publication not authorized.
-5. **Optional work:** T023-T024 complete; T032 local tools ready but real
-   signing blocked; T036-T041 complete (T041 is evaluation-only; no AI code).
+   but release gated; external publication not authorized.
+5. **Optional work:** T023-T024 and T036-T041 complete
+   (T041 is evaluation-only; no AI code).
 
 Do not add a backend, Kubernetes deployment, telemetry, or an AI subscription
 solely to increase apparent project complexity. A polished `v0.1.0` is the

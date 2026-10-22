@@ -3,13 +3,13 @@ metadata:
   source_tasks: docs/plan.md
   last_updated: "2026-10-22"
 summary:
-  total_tasks: 41
-  completed_tasks: 36
+  total_tasks: 39
+  completed_tasks: 37
   in_progress_tasks: 0
-  pending_tasks: 0
-  blocked_tasks: 4
-  cancelled_tasks: 1
-  completion_percentage: 87.8
+  pending_tasks: 1
+  blocked_tasks: 1
+  cancelled_tasks: 0
+  completion_percentage: 94.9
 tasks:
   - task_id: T001
     description: Record project context and contracts
@@ -287,36 +287,25 @@ tasks:
       test_results: {command: "Documentation-only decision; no runtime code changed", passed: 0, failed: 0, skipped: 0, failures: []}
       notes: User chose evaluation only, no provider, no external content sharing, $0 budget, no AI calls, and future credentials via environment variable only if separately approved.
     upstream_trace: {plan_item: Optional enhancements}
-cancelled_tasks:
-  - task_id: T031
-    status: cancelled
-    reason: User explicitly declined a Homebrew tap; make install remains sufficient.
-blocked_tasks:
-  - task_id: T032
-    status: blocked
-    reason: T030 release prerequisite and approved production identity/trusted-key process outstanding; real signing intentionally not performed.
-    local_implementation: [scripts/sign-release.sh, scripts/verify-release.sh, scripts/check-release.sh, scripts/test-signing.sh, docs/signing.md]
-    verification: Disposable-key tests passed for trusted/unsigned/wrong-key/manifest/archive/path/overwrite behavior; test keys removed.
-    upstream_trace: {plan_item: Optional integrations, requirements: [REQ-014]}
   - task_id: T027
-    status: blocked
-    reason: Workflow implemented; verified successful/intentional failing remote runs remain outstanding.
+    status: completed
     local_implementation: [.github/workflows/ci.yml, scripts/ci.sh, Makefile, docs/ci.md]
-    verification: Hosted run 39752877495 passed both Linux jobs; macOS exposed a bounded-lock test assumption. Corrected test passed 50 local race-enabled repetitions and make ci. Full hosted success and deliberate failure verification remain outstanding.
+    verification: Hosted run 39753472332 passed all three jobs on commit 65b9a64, including isolated deliberate formatting-failure assertions in release tests. Run 39752877495 proved real test failures fail the hosted job.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
+pending_tasks:
   - task_id: T030
-    status: blocked
-    reason: T027 remote/native CI prerequisite outstanding; artifact-host and publication approval deferred.
-    local_implementation: [scripts/release.sh, scripts/test-release.sh, Makefile, .gitignore, docs/releases.md]
+    status: pending
+    reason: Manual draft-release workflow implemented; remote draft verification next. Public publication requires approval.
+    local_implementation: [.github/workflows/release.yml, scripts/release.sh, scripts/test-release.sh, Makefile, .gitignore, docs/releases.md]
     verification: Four cross-built archives and native arm64 smoke passed; metadata/licenses/checksums/tamper and failure guards verified in isolated repository.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
+blocked_tasks:
   - task_id: T035
     status: blocked
     reason: T030 and its CI prerequisite remain unmet; no real release authorized.
     local_implementation: [docs/release-notes.md, docs/project-summary.md, README.md]
     verification: Drafts distinguish measured results from cross-build/remote-CI limitations; no release claimed.
     upstream_trace: {plan_item: Project presentation, requirements: [REQ-011]}
-pending_tasks: []
 untracked_changes: []
 traceability_chain:
   - {requirement: REQ-019, tasks: [T040], status: complete}
@@ -326,7 +315,6 @@ traceability_chain:
   - {requirement: REQ-015, tasks: [T037], status: complete}
   - {requirement: REQ-012, tasks: [T023], status: complete}
   - {requirement: REQ-013, tasks: [T024], status: complete}
-  - {requirement: REQ-014, tasks: [T032], status: partial}
   - {requirement: REQ-011, tasks: [T034, T035], status: partial}
   - {requirement: REQ-010, tasks: [T025, T026, T027, T028, T029, T030, T033], status: partial}
   - {requirement: REQ-009, tasks: [T019, T020, T021, T022], status: complete}
@@ -342,9 +330,7 @@ validation:
   passed: true
   errors: []
   warnings:
-    - Linux Go 1.24/stable jobs passed; corrected macOS job and remaining native architectures await hosted verification.
+    - All three CI jobs passed; remaining native architectures must not be claimed as runtime-certified.
   blocking_issues:
-    - T027 workflow is implemented; verified remote success/failure evidence remains outstanding.
-    - T030 distribution remains gated on CI and explicit publication approval.
+    - T030 requires release integration, draft verification and explicit publication approval.
     - T035 drafts prepared but release prerequisite T030 remains blocked.
-    - T032 local signing tools prepared; actual release signing requires T030 and approved key trust.

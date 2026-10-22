@@ -1,8 +1,9 @@
 # Optional local artifact signatures
 
 This is prepared tooling, **not a signed release or an established publisher
-identity**. T032 stays blocked on release readiness and an approved trusted-key
-process. No production key, external signing service, Apple certificate,
+identity**. Production signing is outside the project scope, not an outstanding
+release task. These existing tools are retained as optional local utilities.
+No production key, external signing service, Apple certificate,
 notarization or build-provenance attestation has been configured.
 
 ## What is signed

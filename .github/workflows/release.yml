@@ -1,0 +1,105 @@
+name: Draft release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New version, for example v0.1.0 or v0.2.0-rc.1"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: draft-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_HOST: github.com
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate new version and successful CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! [[ "$VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Invalid version; use vMAJOR.MINOR.PATCH[-alpha.N|-beta.N|-rc.N]."
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/$VERSION"; then
+            echo "::error::Tag already exists; choose a new version."
+            exit 1
+          fi
+          gh api --paginate "repos/$GH_REPO/releases" --jq '.[].tag_name' > "$RUNNER_TEMP/release-tags"
+          if grep -Fxq "$VERSION" "$RUNNER_TEMP/release-tags"; then
+            echo "::error::Release already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh run list --workflow ci.yml --commit "$GITHUB_SHA" --limit 20 \
+            --json status,conclusion \
+            --jq 'any(.[]; .status == "completed" and .conclusion == "success")' > "$RUNNER_TEMP/ci-passed"
+          if ! grep -Fxq true "$RUNNER_TEMP/ci-passed"; then
+            echo "::error::This exact commit needs a successful complete CI run first."
+            exit 1
+          fi
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: stable
+          cache: true
+      - name: Verify source and packaging
+        run: make ci test-release
+      - name: Build and verify release archives
+        run: |
+          make release VERSION="$VERSION"
+          sh scripts/check-release.sh "dist/$VERSION"
+      - name: Create draft release
+        shell: bash
+        run: |
+          set -euo pipefail
+          prerelease=()
+          if [[ "$VERSION" == *-* ]]; then
+            prerelease=(--prerelease)
+          fi
+          gh release create "$VERSION" "dist/$VERSION/"*.tar.gz "dist/$VERSION/SHA256SUMS" \
+            --draft --target "$GITHUB_SHA" --title "OpsMosaic $VERSION" \
+            --notes-file docs/release-notes.md "${prerelease[@]}"
+      - name: Verify downloaded draft assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          download="$RUNNER_TEMP/release-download"
+          mkdir "$download"
+          gh release download "$VERSION" --dir "$download"
+          for target in darwin_arm64 darwin_amd64 linux_arm64 linux_amd64; do
+            test -f "$download/opsmosaic_${VERSION}_${target}.tar.gz"
+          done
+          test "$(find "$download" -maxdepth 1 -type f | wc -l)" -eq 5
+          sh scripts/check-release.sh "$download"
+          mkdir "$download/native"
+          tar -xzf "$download/opsmosaic_${VERSION}_linux_amd64.tar.gz" -C "$download/native"
+          "$download/native/opsmosaic" --version | tee "$RUNNER_TEMP/release-version"
+          grep -F "$VERSION (commit $GITHUB_SHA;" "$RUNNER_TEMP/release-version"
+          gh release view "$VERSION" --json isDraft --jq .isDraft | grep -Fx true
+          {
+            echo "## Verified draft: $VERSION"
+            echo "Commit: $GITHUB_SHA"
+            echo "Four archives and SHA256SUMS downloaded and verified; Linux amd64 version smoke passed."
+            echo "Review the draft in GitHub Releases. Nothing was published publicly."
+          } >> "$GITHUB_STEP_SUMMARY"

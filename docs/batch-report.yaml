@@ -1,3 +1,16 @@
+ci_completion_and_backlog_cleanup:
+  date: "2026-10-22"
+  completed_tasks: [T027]
+  remaining_tasks: [T030, T035]
+  scope: Homebrew and production signing removed from current planning and tracking; existing local signing utilities retained.
+  verification:
+    hosted_run: "39753472332"
+    commit: "65b9a64198e3330a692a86e748a076a0fe0357f0"
+    linux_go_1_24: passed
+    linux_go_stable: passed
+    macos_go_stable: passed
+    negative_check: Successful hosted release tests assert deliberate formatting failure in an isolated fixture; prior hosted test failure confirms job failure propagation.
+  release_integration: User approved manual workflow dispatch and one remote draft verification; public publication remains unapproved.
 hosted_ci_bookmark_test_fix:
   date: "2026-10-22"
   task: T027

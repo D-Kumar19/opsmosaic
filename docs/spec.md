@@ -84,8 +84,9 @@ read: a practical tip, relevant news, and project releases with original links.
 - REQ-014: Prepare optional local OpenSSH signatures over release checksums,
   verifying independently trusted identity/namespace before archive hashes.
   Refuse overwrite and unsafe manifest paths; test unsigned/wrong-key/tampered
-  failures using disposable keys only. Real signing/provenance stays blocked on
-  T030 and approval of publisher trust/key custody. No Apple signing is implied.
+  failures using disposable keys only. These existing local tools are retained;
+  production signing/provenance is outside scope and is not a release gate.
+  No Apple signing is implied.
 
 - REQ-015: `doctor [--json]` reports local executable/build/platform, redacted
   state paths, profile validity and cached-source ages/status without network,

@@ -1,0 +1,66 @@
+OpsMosaic terminal demo
+Actual CLI output, captured with a disposable Alex profile in a 100-column PTY.
+UTC is used for the demo; normal runs use your device timezone.
+Both commands avoid networking. Offline uses a bundled tip here; no news cache is seeded.
+Dates, selected tips and greetings vary between recordings.
+
+=== First run / example profile ===
+$ opsmosaic --tips --color=never
+
+Welcome to OpsMosaic - your personal tech briefing.
+What should I call you?
+Choose your interests:
+  1. Docker
+  2. Kubernetes
+  3. AWS
+  4. Security
+  5. Helm
+  6. Argo CD
+  7. Kargo
+  8. Crossplane
+  9. AI
+Topic numbers (comma-separated, e.g. 1,2,3):
+☀️ Good morning, Alex
+
+=== Choose interests / one random tip ===
+$ opsmosaic --tips --color=never
+
+Welcome to OpsMosaic - your personal tech briefing.
+What should I call you?
+Choose your interests:
+  1. Docker
+  2. Kubernetes
+  3. AWS
+  4. Security
+  5. Helm
+  6. Argo CD
+  7. Kargo
+  8. Crossplane
+  9. AI
+Topic numbers (comma-separated, e.g. 1,2,3):
+☀️ Good morning, Alex!
+☕ Need a coffee? Here's a little signal to start your day.
+🕒 Thursday, 22 October 2026 | 07:24 UTC
+
+TIP | Security
+  List Services across namespaces and inspect exposed service types; this requires cluster-wide list
+  permission.
+    kubectl get services --all-namespaces
+  Kubernetes documentation
+  https://kubernetes.io/docs/concepts/services-networking/service/
+
+=== Return offline / no onboarding or network ===
+$ opsmosaic --offline --color=never
+
+Warning: No news available for these topics. Try opsmosaic refresh when online, or --tips.
+
+☀️ Good morning, Alex!
+🌱 Fresh day, fresh context. Let's learn one small thing.
+🕒 Thursday, 22 October 2026 | 07:24 UTC
+
+TIP | Kubernetes
+  Check your target cluster and namespace before running a command.
+    kubectl config current-context
+    kubectl config view --minify
+  Kubernetes documentation
+  https://kubernetes.io/docs/reference/kubectl/generated/kubectl_config_current-context/

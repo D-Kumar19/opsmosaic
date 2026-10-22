@@ -1,14 +1,15 @@
 metadata:
   generated: "2026-10-13"
   source_tasks: docs/plan.md
-  last_updated: "2026-10-19"
+  last_updated: "2026-10-22"
 summary:
   total_tasks: 41
-  completed_tasks: 27
+  completed_tasks: 36
   in_progress_tasks: 0
-  pending_tasks: 12
-  blocked_tasks: 2
-  completion_percentage: 65.9
+  pending_tasks: 0
+  blocked_tasks: 4
+  cancelled_tasks: 1
+  completion_percentage: 87.8
 tasks:
   - task_id: T001
     description: Record project context and contracts
@@ -173,7 +174,7 @@ tasks:
       notes: Core coverage 94.1%; real 40-column PTY, redirected output, install tests, vet and Linux cross-compilation passed.
     upstream_trace: {plan_item: Display polish, requirements: [REQ-009]}
   - task_id: T025
-    description: Confirm repository-scoped repository destination and unchanged visibility
+    description: Record project repository destination and access expectations
     status: completed
     implementation:
       files_changed: [README.md, docs/ci.md, docs/releases.md, docs/plan.md]
@@ -200,15 +201,106 @@ tasks:
       files_changed: [CHANGELOG.md, docs/releases.md, docs/ci.md]
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
   - task_id: T033
-    description: Document project contribution setup tests and review expectations
+    description: Document contribution setup tests and review expectations
     status: completed
     implementation:
       files_changed: [CONTRIBUTING.md, README.md, docs/testing.md]
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
+  - task_id: T034
+    description: Add actual-output terminal GIF and accessible transcript
+    status: completed
+    implementation:
+      files_changed: [scripts/demo.py, scripts/render-demo.swift, scripts/test-demo.py, Makefile, docs/demo/README.md, docs/demo/terminal.gif, docs/demo/transcript.txt, README.md]
+    verification:
+      test_results: {command: "make test-demo", passed: 5, failed: 0, skipped: 0, failures: []}
+      notes: make demo passed; three decoded frames, native output shape checks and visual review; disposable profile and no networking.
+    upstream_trace: {plan_item: Project presentation, requirements: [REQ-011]}
+  - task_id: T023
+    description: Opt-in zsh/bash hook installation and removal with offline profile-aware greeting
+    status: completed
+    implementation:
+      files_changed: [internal/brief/integration.go, internal/brief/integration_test.go, internal/brief/app.go, scripts/test-shell.py, scripts/test-install.sh, docs/shell-integration.md]
+    verification:
+      notes: Managed block idempotence, backups/permissions/preservation and malformed/symlink rejection; real bash/zsh PTY tests for interactive-only rendering, missing profile/executable, visible failures and removal.
+    upstream_trace: {plan_item: Optional integrations, requirements: [REQ-012]}
+  - task_id: T024
+    description: Opt-in macOS launchd refresh every three hours with cache-only background updates
+    status: completed
+    implementation:
+      files_changed: [internal/brief/integration.go, internal/brief/integration_test.go, internal/brief/store.go, docs/shell-integration.md]
+    verification:
+      notes: Plist lint, simulated launchctl enable/status/disable/failures and rollback; local HTTP recovery, unchanged history, busy lock and cancellation. No real job enabled.
+    upstream_trace: {plan_item: Optional integrations, requirements: [REQ-013]}
+  - task_id: T037
+    description: Local-only read-only doctor diagnostics with versioned JSON and private-value omission
+    status: completed
+    implementation:
+      files_changed: [internal/brief/doctor.go, internal/brief/doctor_test.go, internal/brief/app.go, scripts/test-install.sh, docs/doctor.md]
+    verification:
+      test_results: {command: "make ci; make test-release", passed: 126, failed: 0, skipped: 0, failures: []}
+      notes: 91.0% core coverage; privacy/JSON/state read-only tests and standalone diagnostics passed; no real profile used.
+    upstream_trace: {plan_item: Optional enhancements, requirements: [REQ-015]}
+  - task_id: T036
+    description: Add public HTTPS custom RSS/Atom feeds through additive CLI configuration
+    status: completed
+    implementation:
+      files_changed: [internal/brief/custom_feeds.go, internal/brief/custom_feeds_test.go, internal/brief/public_feed.go, internal/brief/feed.go, internal/brief/app.go, internal/brief/integration.go, internal/brief/doctor.go, scripts/test-install.sh, docs/custom-feeds.md]
+    verification:
+      test_results: {command: "make ci; make test-release; make test-shell; make test-signing", passed: 137, failed: 0, skipped: 0, failures: []}
+      notes: 90.7% core coverage; 11 custom-feed tests cover CLI/schema/migration/concurrency/offline/cache and guarded public HTTPS/DNS/redirect behavior via local fixtures. No real custom feed configured on user's machine.
+    upstream_trace: {plan_item: Optional enhancements, requirements: [REQ-016]}
+  - task_id: T038
+    description: Per-run stable-only RELEASE filtering with unchanged defaults/cache/news/tips
+    status: completed
+    implementation:
+      files_changed: [internal/brief/releases.go, internal/brief/releases_test.go, internal/brief/app.go, scripts/test-install.sh, README.md]
+    verification:
+      test_results: {command: "make ci; make test-release", passed: 142, failed: 0, skipped: 0, failures: []}
+      notes: 90.9% core coverage; five targeted tests cover tags/labels/component prefixes, adapter output, custom offline/refresh behavior, cache preservation and empty result semantics.
+    upstream_trace: {plan_item: Optional enhancements, requirements: [REQ-017]}
+  - task_id: T039
+    description: Persist complete last briefing and independently retained bookmarks
+    status: completed
+    implementation:
+      files_changed: [internal/brief/saved.go, internal/brief/saved_test.go, internal/brief/app.go, internal/brief/display.go, internal/brief/doctor.go, scripts/test-install.sh, docs/bookmarks.md]
+    verification:
+      build_passed: true
+      test_results: {command: "make ci; go test -json ./...", passed: 153, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 91.5%; eleven saved-state regression tests, standalone replay/bookmark commands and four-target archive checks passed.
+    upstream_trace: {plan_item: Optional enhancements, requirements: [REQ-018]}
+  - task_id: T040
+    description: Add dependency-free interactive topic selection with numbered fallback
+    status: completed
+    implementation:
+      files_changed: [internal/brief/onboard.go, internal/brief/picker.go, internal/brief/picker_wait_unix.go, internal/brief/picker_wait_other.go, internal/brief/picker_test.go, internal/brief/app.go, scripts/test-shell.py, scripts/demo.py]
+    verification:
+      build_passed: true
+      test_results: {command: "make ci; make test-shell; make test-release; make test-demo; go test -json ./...", passed: 157, failed: 0, skipped: 0, failures: []}
+      notes: Core coverage 87.7%; real PTY selection, live resize/scroll, cancel-with-profile-preservation, terminal restoration and numbered fallback passed.
+    upstream_trace: {plan_item: Optional enhancements, requirements: [REQ-019]}
+  - task_id: T041
+    description: Evaluate optional AI summaries and record a privacy/cost/provider decision
+    status: completed
+    implementation:
+      files_changed: [docs/ai-summaries.md]
+    verification:
+      test_results: {command: "Documentation-only decision; no runtime code changed", passed: 0, failed: 0, skipped: 0, failures: []}
+      notes: User chose evaluation only, no provider, no external content sharing, $0 budget, no AI calls, and future credentials via environment variable only if separately approved.
+    upstream_trace: {plan_item: Optional enhancements}
+cancelled_tasks:
+  - task_id: T031
+    status: cancelled
+    reason: User explicitly declined a Homebrew tap; make install remains sufficient.
 blocked_tasks:
+  - task_id: T032
+    status: blocked
+    reason: T030 release prerequisite and approved production identity/trusted-key process outstanding; real signing intentionally not performed.
+    local_implementation: [scripts/sign-release.sh, scripts/verify-release.sh, scripts/check-release.sh, scripts/test-signing.sh, docs/signing.md]
+    verification: Disposable-key tests passed for trusted/unsigned/wrong-key/manifest/archive/path/overwrite behavior; test keys removed.
+    upstream_trace: {plan_item: Optional integrations, requirements: [REQ-014]}
   - task_id: T027
     status: blocked
-    reason: No verified project runner assignment; remote successful and deliberate failing runs required.
+    reason: GitHub Actions workflow configuration and verified successful/intentional failing remote runs remain outstanding.
     local_implementation: [scripts/ci.sh, Makefile, docs/ci.md]
     verification: Local pipeline and intentional formatting-failure test passed on Go 1.27.2 macOS arm64.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
@@ -218,21 +310,24 @@ blocked_tasks:
     local_implementation: [scripts/release.sh, scripts/test-release.sh, Makefile, .gitignore, docs/releases.md]
     verification: Four cross-built archives and native arm64 smoke passed; metadata/licenses/checksums/tamper and failure guards verified in isolated repository.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
-pending_tasks:
-  - {task_id: T023, status: pending}
-  - {task_id: T024, status: pending}
-  - {task_id: T031, status: pending}
-  - {task_id: T032, status: pending}
-  - {task_id: T034, status: pending}
-  - {task_id: T035, status: pending}
-  - {task_id: T036, status: pending}
-  - {task_id: T037, status: pending}
-  - {task_id: T038, status: pending}
-  - {task_id: T039, status: pending}
-  - {task_id: T040, status: pending}
-  - {task_id: T041, status: pending}
+  - task_id: T035
+    status: blocked
+    reason: T030 and its CI prerequisite remain unmet; no real release authorized.
+    local_implementation: [docs/release-notes.md, docs/project-summary.md, README.md]
+    verification: Drafts distinguish measured results from cross-build/remote-CI limitations; no release claimed.
+    upstream_trace: {plan_item: Project presentation, requirements: [REQ-011]}
+pending_tasks: []
 untracked_changes: []
 traceability_chain:
+  - {requirement: REQ-019, tasks: [T040], status: complete}
+  - {requirement: REQ-018, tasks: [T039], status: complete}
+  - {requirement: REQ-017, tasks: [T038], status: complete}
+  - {requirement: REQ-016, tasks: [T036], status: complete}
+  - {requirement: REQ-015, tasks: [T037], status: complete}
+  - {requirement: REQ-012, tasks: [T023], status: complete}
+  - {requirement: REQ-013, tasks: [T024], status: complete}
+  - {requirement: REQ-014, tasks: [T032], status: partial}
+  - {requirement: REQ-011, tasks: [T034, T035], status: partial}
   - {requirement: REQ-010, tasks: [T025, T026, T027, T028, T029, T030, T033], status: partial}
   - {requirement: REQ-009, tasks: [T019, T020, T021, T022], status: complete}
   - {requirement: REQ-001, tasks: [T002, T003, T006, T013], status: complete}
@@ -249,5 +344,7 @@ validation:
   warnings:
     - Native macOS amd64/Linux and Go 1.24 matrix unverified.
   blocking_issues:
-    - T027 requires a verified project runner and remote success/failure evidence.
+    - T027 requires a configured workflow and verified remote success/failure evidence.
     - T030 distribution remains gated on CI and explicit publication approval.
+    - T035 drafts prepared but release prerequisite T030 remains blocked.
+    - T032 local signing tools prepared; actual release signing requires T030 and approved key trust.

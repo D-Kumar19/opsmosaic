@@ -19,6 +19,84 @@ Only macOS arm64 execution was verified; other targets were cross-built.
 Go 1.24 and the remote Go/OS matrix remain unverified pending tooling/runners.
 See [CI readiness](ci.md); do not interpret local success as remote CI.
 
+Phase 4 adds `make test-demo` (five Python standard-library cases) and
+`make demo` (macOS-only media generation). The recorder tests prompt/reply
+handling, command failures, missing prompts, timeouts and output validation.
+Actual captures assert one tip, example name/UTC, no escape sequences and no
+repeat onboarding offline. The renderer checks text fits, GIF finalization,
+three decoded 1100x880 frames and playback timing. These tests are separate
+from the 107-case Go baseline. A real GIF/transcript was generated and reviewed
+using disposable state; no personal profile or live feed requests were used.
+See [demo instructions](demo/README.md).
+
+## Shell, scheduling and signing follow-up
+
+Latest local result: **119 passing Go cases**, no failures/skips, race/vet passed,
+**90.4% core statement coverage**. The prior 94.1% figure above is the historical
+Phase 3 result, not the current expanded codebase's coverage.
+
+- Hook tests: repeated install/removal, original backup/content/permissions,
+  malformed markers, symlink rejection, profile-aware skip and visible errors.
+- `make test-shell`: real bash/zsh interactive and noninteractive PTYs,
+  missing profile/executable, visible process failures and uninstall, all
+  with temporary shell files/state. Startup measurements are local samples.
+- Scheduler tests: macOS `plutil` syntax, three-hour interval/private umask,
+  escaped paths and pinned state, simulated launchctl enable/status/disable,
+  bootstrap rollback/bootout failure, unmanaged-file rejection.
+- Cache-only scheduled refresh: local HTTP success/failure/cache retention,
+  unchanged history/greeting visits, busy lock, cancellation, corrupt/empty
+  state and no onboarding.
+- `make test-signing`: temporary keys, trusted signature, unsigned/wrong-key
+  rejection, manifest/archive tampering, unsafe path rejection and overwrite
+  protection. No real release key or signature is created.
+- `make ci`, `make test-release` and standalone reinstall passed.
+
+Real launchd activation was intentionally not tested or enabled on the shared
+machine. Remote CI/native non-macOS-arm64 verification and production signing
+remain outstanding; these are not represented by the simulated tests.
+
+## Doctor follow-up
+
+Latest baseline: **126 passing Go cases**, zero failures/skips, **91.0% core
+coverage**, race/vet/install checks and four-target release tests passed.
+Seven doctor tests cover missing/corrupt/unreadable state, schema versions,
+stale/future/unknown and partial-merge ages, exact JSON top-level keys,
+privacy sentinels, home-path boundaries, errors/cancellation/help/output
+failures, no network and no lock/state writes. Tests run against isolated
+state, including while another transaction holds its lock. Standalone install
+tests cover text and JSON diagnostics without onboarding.
+
+## Custom-feed follow-up
+
+Latest baseline: **137 passing Go cases**, no failures/skips, **90.7% core
+coverage**; race/vet/install, four-target release, real shell and signing tests
+passed. Eleven custom-feed tests cover commands/config/schema, duplicate/count
+limits, permissions and legacy profile preservation, concurrent edits, full
+definition cache identity, removal pruning, shared TTL/failure/topic behavior,
+offline custom news/releases and doctor privacy.
+
+Public URL/address tests include local/private/special-use destinations,
+credentials, queries, fragments and alternate ports. The connection tests use
+a local trusted TLS server with injected public DNS/dial boundaries; they check
+IP pinning, empty/mixed/private DNS, redirect downgrade/private targets/query
+strings/loops, connection/DNS failures and cancellation. RSS/Atom parsing and
+unsafe-link/sanitization use local fixtures. There are no live custom-source
+requests or private-network probes in tests.
+
+Standalone installation tests exercise feed add/list/remove and diagnostic
+validation using a disposable profile; those commands do not fetch.
+
+## Stable-release filtering follow-up
+
+Latest baseline: **142 passing Go cases**, no failures/skips, **90.9% core
+coverage**, race/vet/install and four-target release checks passed.
+Five focused tests cover stable SemVer and build metadata, supported component
+prefixes, alpha/beta/RC/nightly and unknown labels, explicit tag precedence
+through actual Atom parsing (including escaped component tags), custom offline
+filtering and unchanged defaults/cache, news/tip preservation, empty-result
+errors/fallback, invalid flag combinations and refresh cache retention.
+The standalone installation test exercises `--tips --stable-only`.
+
 | Area | Cases |
 |---|---|
 | Onboarding | Name + multiple interests, invalid input retries, deduplicated selections, EOF |
@@ -44,6 +122,41 @@ See [CI readiness](ci.md); do not interpret local success as remote CI.
 | Output policy | TTY/non-TTY/dumb/unknown terminals; plain overrides color; nonempty NO_COLOR (including zero) beats always; never disables color; redirected output keeps text greetings without ANSI/decorations |
 | Version | Dev defaults, explicit release metadata, no profile/cache/lock creation, no network, invalid combinations, output-writer failures |
 | Release | Four archives, metadata in all targets, native command smoke, documentation/license fidelity, checksum verification/tampering, invalid version/dirty tree/overwrite rejection, failed-build cleanup |
+
+## Bookmarks and replay follow-up (T039)
+
+Latest baseline: **153 passing Go cases**, no failures/skips, **91.5% core
+statement coverage**. `make ci` and four-target `make test-release` pass.
+Eleven saved-state tests cover complete snapshots, private permissions, single/
+multi-item numbering, empty history, duplicates and the 100-item no-eviction
+limit, canonical article versus tip identity, concurrent writers, held locks,
+removed profile/cache/sources, preserved original timestamps/source/link, and
+control-sequence sanitization. They also cover invalid schema/content/paths,
+the 16 MiB bound, output/cancellation failures, unchanged state on replay,
+normal bookmark retention, busy fallback and successful local scheduled refresh.
+Doctor detects invalid saved state without exposing a private sentinel.
+Standalone installation checks replay plus add/list/show/remove outside checkout.
+All fixtures use temporary state and local HTTP only.
+
+## Interactive topic picker follow-up (T040)
+
+Latest baseline: **157 passing Go cases**, zero failures/skips, **87.7% core
+statement coverage**. Local CI/race/vet/build/install, four-target packaging,
+five demo-tool cases and real bash/zsh PTY integration passed. Picker unit tests
+cover navigation/wraparound, toggling, empty-confirm validation, cancellation,
+key sequences, scrolling, sanitized names, the numbered fallback and output
+shape. PTY checks drive arrow/Space/Enter, resize to a short terminal mid-choice,
+confirm the selected topics, cancel a later config without altering the saved
+profile, and verify canonical input/echo restoration. All profiles and shell
+files are disposable; no personal configuration was used.
+
+## AI-summary evaluation follow-up (T041)
+
+Evaluation-only decision; no AI provider, credentials, runtime behavior or
+external data sharing were added. No new runtime test cases apply. Existing
+headline, attribution/link, terminal-sanitization and offline tests remain the
+relevant regression coverage; the measured Go baseline remains 157 passing
+cases with 87.7% core statement coverage.
 
 ## Manual acceptance
 

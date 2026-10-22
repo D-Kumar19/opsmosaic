@@ -2,10 +2,9 @@
 
 ## Scope and support
 
-The project remains on `https://github.com/D-Kumar19/opsmosaic` with existing
-visibility unchanged. Do not copy code or artifacts to an outside host.
-The source is MIT-licensed to Dheeraj Kumar (2026); this choice does not
-override maintainer publication controls or grant rights to article bodies.
+Project repository: `https://github.com/D-Kumar19/opsmosaic`.
+The source is MIT-licensed to Dheeraj Kumar (2026). This license does not grant
+rights to third-party article bodies. Releases require maintainer approval.
 
 Target initial version: `v0.1.0`. No tag or release exists merely because that
 version appears in documentation or local test artifacts.
@@ -58,22 +57,30 @@ Verify on macOS with `shasum -a 256 -c SHA256SUMS`, or on Linux with
 `sha256sum -c SHA256SUMS`, inside the release directory. Extract the matching
 archive and install its executable into a directory on PATH. Test `--version`
 and a disposable profile before distribution. Checksums detect corruption;
-they are not signatures or publisher authentication. Builds include a real
+they are not signatures or publisher authentication. Optional
+[OpenSSH signing/verification tools](signing.md) have disposable-key tests but
+no approved production signing identity. Builds include a real
 build timestamp; byte-for-byte reproducible archives are not claimed.
 
 ## Approval gates
 
 Before an actual release:
 
-1. Verify ownership/access requirements and approved project artifact destination.
+1. Confirm repository access and the maintainer-approved artifact destination.
 2. Unblock [CI](ci.md), run the Go/OS matrix, and review failing checks.
 3. Validate archives, dependency notices, checksums and native platform behavior.
 4. Move appropriate changelog entries into a dated version section.
 5. Get explicit approval, then tag the reviewed commit using SemVer.
-6. Separately approve the push and upload to the chosen project destination.
+6. Separately approve the push and upload to the chosen release destination.
 
 Use `vMAJOR.MINOR.PATCH` tags; supported prereleases are `-alpha.N`, `-beta.N`,
 or `-rc.N` with positive N. Do not change an existing release tag; publish a
-new patch version. Until 1.0, document breaking changes explicitly. Homebrew,
-signing/provenance, artifact-host integration and public launch remain separate,
+new patch version. Until 1.0, document breaking changes explicitly.
+The Homebrew tap was declined; `make install` remains the supported path.
+Signing/provenance, artifact-host integration and publication remain separate,
 unapproved tasks. A clean-tree requirement prevents packaging uncommitted code.
+
+[Draft release notes](release-notes.md) and a [project summary](project-summary.md)
+are prepared for maintainer review, with the [terminal demo](demo/README.md).
+These materials do not satisfy the outstanding runner/native-test gates or
+authorize a release.

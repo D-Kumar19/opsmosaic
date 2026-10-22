@@ -34,6 +34,15 @@ T006 follows T005; T007 follows T006; T008 follows T007.
 | REQ-008 | T002, T007, T008 | test/race/vet/build/smoke evidence |
 | REQ-009 | T019, T020, T021, T022 | Unicode layout, output policy and CLI display tests |
 | REQ-010 | T025, T026, T027, T028, T029, T030, T033 | Version tests, local CI and isolated release tests; remote runner/publication gates blocked |
+| REQ-011 | T034, T035 | Actual isolated terminal GIF/transcript, demo-tool tests, project summary and draft notes; release gate remains blocked |
+| REQ-012 | T023 | Hook lifecycle, backup/preservation, skip/error behavior and real bash/zsh PTY tests |
+| REQ-013 | T024 | Three-hour plist, simulated launchctl lifecycle, cache-only fetch/failure/locking tests |
+| REQ-014 | T032 | Disposable-key signing and tamper/trust tests; real release signing remains blocked |
+| REQ-015 | T037 | Read-only diagnostics, redaction/JSON contract, cache ages and standalone-command tests |
+| REQ-016 | T036 | Additive feed commands, migration/cache/offline/concurrency tests and guarded TLS/DNS/redirect fixtures |
+| REQ-017 | T038 | Version/tag classification, actual feed fixture, custom offline/refresh cache preservation, empty-result and installed flag tests |
+| REQ-018 | T039 | Complete saved snapshots, numbering/duplicates/limits, offline replay, sanitization, locking, doctor privacy and installed commands |
+| REQ-019 | T040 | PTY arrow/Space/Enter selection, live resize/scroll, cancellation, termios restoration and numbered fallback |
 
 ## Future backlog
 
@@ -45,7 +54,11 @@ progress; recording tasks does not approve a design, publication, or release.
 - Work on tasks only when requested. On 2026-10-19 the user authorized the
   first milestone (Reliability, T015-T018), then the second milestone
   (Display polish, T019-T022), and then release foundations
-  (T025-T030, T033). Later milestones remain unstarted.
+  (T025-T030, T033), then presentation materials (T034-T035).
+  T031 was explicitly cancelled; optional tasks are authorized individually.
+- The user subsequently approved T023/T024 and the local-tooling portion of
+  T032. Shell edits and scheduler activation on the actual machine remain
+  opt-in; real signing remains blocked as explicitly agreed.
 - Before implementing a task, ask the user about unresolved behavior, scope,
   or design decisions using the clarification form. Do not silently choose
   between materially different approaches.
@@ -154,34 +167,39 @@ marks and ZWJ emoji. Commands/URLs stay unbroken. Linux amd64 cross-compilation
 passed (native Linux runtime validation remains for CI). Reinstalled the
 standalone command; personal profile/cache were not used for verification.
 
-- [ ] **T023 [P3] Provide opt-in shell integration.**
+- [x] **T023 [P3] Provide opt-in shell integration.**
   Document or generate an interactive-terminal hook that stays network-free
   and does not clear output or unexpectedly start onboarding.
   Test repeated setup, missing executable/profile, noninteractive shells,
   startup errors, and measured startup cost.
-  **Ask first:** documentation-only versus an install/uninstall command;
-  supported shells and acceptable startup-time budget?
+  **Approved 2026-10-19:** explicit install/uninstall for zsh/bash with a
+  user-selected file; do not modify the user's existing configuration now.
+  Every new terminal greets offline, skips missing profile/executable and
+  preserves errors. Measured sample missing-profile real-shell startup ~19–22 ms;
+  no portable fixed latency guarantee. See `docs/shell-integration.md`.
   Dependencies: T020, T021.
-- [ ] **T024 [P3] Offer optional scheduled refresh and briefing frequency.**
+- [x] **T024 [P3] Offer optional scheduled refresh and briefing frequency.**
   Keep terminal startup independent from network refresh; make scheduling
   explicit, removable, and observable rather than silently launching jobs.
   Test schedule configuration, repeated enable/disable, refresh failures,
   offline operation, and concurrent terminal access.
-  **Ask first:** manual-only versus opt-in macOS launchd/Linux scheduling;
-  frequency, network policy, logs, and whether to suppress repeated greetings
-  across closely spaced terminal launches?
+  **Approved 2026-10-19:** opt-in macOS launchd only, every three hours;
+  every new terminal greets (no suppression). Explicit enable/disable/status,
+  private local logs, existing profile and pinned executable/state paths.
+  Cache-only background refresh preserves display history and exposes errors.
+  No actual job enabled; plist/lifecycle tested with simulated launchctl and
+  local HTTP/lock tests. Native launchd activation requires user opt-in.
   Dependencies: T017, T018.
 
 ### Publication and release foundations
 
 - [x] **T025 [P1] Confirm publication rights and repository destination.**
-  Confirm code ownership, permission to publish publicly,
+  Confirm code ownership, permission to publish,
   intended audience, and public/private destination. Update clone/support
   links only after approval and verify access for the intended audience.
-  **Approved 2026-10-19:** stay on `github.com/D-Kumar19/opsmosaic`;
-  leave visibility unchanged (API reports `private: false`). No external
-  publication or mirror is approved. External publication rights are not
-  established; this completion records the chosen repository-scoped scope.
+  **Current project destination (2026-10-22):**
+  `https://github.com/D-Kumar19/opsmosaic`. Repository visibility and remote
+  release availability must be checked rather than inferred from this plan.
   Dependencies: none.
 - [x] **T026 [P1] Choose and add a license.**
   Add the approved license with correct holder/year; clarify third-party
@@ -189,17 +207,17 @@ standalone command; personal profile/cache were not used for verification.
   Verify license identification and README links.
   **Approved 2026-10-19:** MIT, Copyright (c) 2026 Dheeraj Kumar;
   source licensing does not grant rights to third-party article bodies or
-  override maintainer controls.
+  replace release approval.
   Dependencies: T025.
 - [ ] **T027 [P1] Add continuous integration.**
   Automate formatting checks, unit tests, race tests, vet, build, and isolated
   installation tests. Set a supported Go/OS matrix and useful failure output.
   Verify the chosen runner executes the commands and a deliberate failure
   fails the job; do not claim CI is live before its remote run is checked.
-  **Approved 2026-10-19:** inspect project Actions and actual runners; do not guess
-  labels. Intended matrix: Go 1.24.x/latest stable on native macOS/Linux.
-  **Blocked:** Actions enabled but zero visible self-hosted runners and hosted
-  availability unverified (404). Team examples do not prove access.
+  **Current scope:** configure GitHub Actions for the personal repository.
+  Intended matrix: Go 1.24.x/latest stable on native macOS/Linux.
+  **Outstanding:** workflow configuration, account permissions/usage checks,
+  and verified successful and intentional failing remote runs.
   `make ci` and deliberate local formatting failure pass verification;
   remote wiring and real success/failure runs remain outstanding. See `docs/ci.md`.
   Dependencies: T025.
@@ -234,20 +252,21 @@ standalone command; personal profile/cache were not used for verification.
   **Blocked:** T027 remote/native CI prerequisite; real distribution/tagging
   also requires artifact destination and explicit approval. No release uploaded.
   Dependencies: T026, T027, T028, T029.
-- [ ] **T031 [P2] Publish a real Homebrew tap.**
-  Create a formula backed by accessible tagged source or release artifacts,
-  verify checksums, and document install/upgrade/uninstall.
-  Run formula audit/install tests, verify the installed version, and smoke
-  test a fresh user with no Go runtime dependency for binary distribution.
-  **Ask first:** tap owner/repository, public access, source versus binary
-  formula, and who maintains future releases?
-  Dependencies: T030.
+- **T031 [P2] Publish a real Homebrew tap — CANCELLED.**
+  **User decision 2026-10-19:** no tap needed; existing `make install` is
+  sufficient. No formula, tap repository or Homebrew release is planned.
+  Retained for task-history traceability, not counted as open or completed.
 - [ ] **T032 [P3] Add signing/provenance where appropriate.**
   Evaluate release signatures, provenance, and macOS signing/notarization;
   implement only approved measures with credentials kept out of the repo.
   Test verification steps, tampered artifacts, and unsigned failure modes.
-  **Ask first:** desired trust guarantees, certificate/service availability,
-  acceptable cost, and whether this is needed for the initial release?
+  **Approved 2026-10-19:** prepare optional local OpenSSH artifact
+  signing/verification using disposable test keys; keep real signing blocked.
+  Local scripts sign the checksum manifest, verify trusted identity/namespace
+  then hashes, reject tampering/unsafe paths/overwrite, and never publish.
+  **Blocked:** T030 release prerequisite and approved production trust/key
+  management. No real signature, provenance attestation or Apple signing.
+  See `docs/signing.md`.
   Dependencies: T030.
 
 ### Community and portfolio presentation
@@ -257,72 +276,117 @@ standalone command; personal profile/cache were not used for verification.
   where to report bugs; add concise issue/PR templates if useful.
   Verify instructions from a clean checkout and use the chosen platform's
   supported template format.
-  **Approved 2026-10-19:** contributors with project repository access, issues/PRs
-  on that host, concise setup/test/source/tip/review instructions. Templates
+  **Current scope:** contributors with repository access, GitHub issues/PRs,
+  concise setup/test/source/tip/review instructions. Templates
   deferred. Build/install/release instructions verified using isolated fixtures.
   Dependencies: T025.
-- [ ] **T034 [P2] Add a short terminal demo.**
+- [x] **T034 [P2] Add a short terminal demo.**
   Show onboarding, time-aware greeting, one random item, and offline behavior.
   Use an example profile with no personal data; keep media accessible and
   include a text equivalent.
-  **Ask first:** GIF/video/static screenshots, visual style, and where assets
-  should live? Do not record the user's real shell/profile without approval.
+  **Approved 2026-10-19:** animated terminal GIF and text transcript, stored in
+  `docs/demo/`, using disposable Alex state, not the user's shell/profile.
+  Three actual-output scenes show onboarding, one tip and offline return;
+  captions explain UTC, disabled color and the intentionally empty news cache.
+  Five capture-tool tests pass; the renderer verifies three decodable frames
+  with no text overflow. Regeneration uses Python stdlib and macOS Swift/AppKit,
+  adding no production dependency. See `docs/demo/README.md`.
   Dependencies: T019, T020, T021.
 - [ ] **T035 [P2] Prepare the initial release and portfolio summary.**
   Write concise release notes, architecture/design trade-offs, and an accurate
   CV/project description. Include only measured test/performance/adoption data.
   Verify install links and declared features; tag/publish only on approval.
-  **Ask first:** intended audience, release readiness criteria, and whether
-  to publish a CV bullet, blog post, or project-page summary?
+  **Scope:** README/project summary and draft release notes;
+  no unsupported CV claims or automatic publishing.
+  **Prepared locally:** `docs/project-summary.md`, `docs/release-notes.md`,
+  README demo links and honest measurements/platform limitations.
+  **Blocked:** T030 release prerequisite (including T027 CI) remains unmet;
+  real release/tag/push/upload still needs separate approval. Drafts are not
+  presented as an available release.
   Dependencies: T015, T016, T017, T018, T030, T033, T034.
 
 ### Optional product enhancements
 
-- [ ] **T036 [P3] Support user-configurable feeds.**
+- [x] **T036 [P3] Support user-configurable feeds.**
   Design a small validated local configuration for custom RSS/Atom sources,
   topic mapping, and source attribution; preserve built-in defaults and
   migrate configuration without losing preferences.
   Test invalid/duplicate feeds, HTTP failures, schema compatibility, filtering,
   deduplication, terminal sanitization, and portable/offline behavior.
-  **Ask first:** add versus replace built-ins, supported source types,
-  configuration format, URL policy, and whether authenticated feeds are
-  explicitly out of scope? No plugin system unless separately requested.
+  **Approved 2026-10-19:** CLI `feeds add/list/remove`, separate versioned
+  JSON, supplement built-ins, one existing topic and news/release per feed,
+  all valid entries without keyword filtering. Public HTTPS/443 only, no
+  authentication, private/local targets, query strings or fragments.
+  Maximum 20 custom feeds; guard DNS/IP at connect and redirect time.
+  Reuse cache/offline/scheduled refresh; doctor validates with private aliases.
+  No plugins or new topics. See `docs/custom-feeds.md`.
   Dependencies: none.
-- [ ] **T037 [P3] Add a diagnostic command.**
+- [x] **T037 [P3] Add a diagnostic command.**
   `opsmosaic doctor` should explain executable/version, state paths, profile
   health, cache ages, and source status without leaking private values.
   Test missing/corrupt state and useful exit codes.
-  **Ask first:** local-only by default or active source probes? Which
-  diagnostic details may be displayed, and is JSON output wanted?
+  **Approved 2026-10-19:** local-only, human and `--json`, home path prefix
+  replaced by `~`; no names/interests/headlines/URLs. No network, state lock,
+  onboarding, repair or writes. Missing/stale state warns; corrupt/unreadable
+  state or invalid arguments/configuration returns nonzero. Cache status is
+  explicitly not a live health probe. See `docs/doctor.md`.
   Dependencies: T018, T028.
-- [ ] **T038 [P3] Offer stable-release-only filtering.**
+- [x] **T038 [P3] Offer stable-release-only filtering.**
   Keep upstream labels visible and make prerelease filtering explicit.
   Test RC/alpha/beta/nightly tags, unknown version formats, and empty results.
-  **Ask first:** default include/exclude prereleases, opt-in flag/config,
-  and treatment of non-semver tags and nested component releases?
+  **Approved and implemented 2026-10-19:** keep defaults; per-run
+  `--stable-only` excludes prereleases/unknown RELEASE formats only.
+  Explicit release-tag links take precedence; otherwise require a complete
+  SemVer label with optional supported component prefix or `Release ` prefix.
+  Tips/news unaffected; filter never discards cache. Empty news-only results
+  fail; mixed mode retains tip fallback. Arbitrarily nested/ambiguous labels
+  excluded conservatively. Five regression tests and standalone flag checks pass.
   Dependencies: none.
-- [ ] **T039 [P3] Add bookmarks and replay.**
+- [x] **T039 [P3] Add bookmarks and replay.**
   Save an interesting item and show the last displayed item again without
   fetching; keep state independent from expiring feed cache.
   Test persistence, empty history, removed source items, duplicate bookmarks,
   and concurrent writers.
-  **Ask first:** command names, retention, storage, and whether replay advances
-  content history or greeting rotation?
+  **Approved and implemented 2026-10-19:** independent `saved.json` remembers
+  the complete last normal briefing; `replay` and `bookmarks add/list/show/remove`.
+  Multi-item adds require a 1-based number. Keep up to 100 bookmarks until
+  removal, reject full additions, reuse duplicates without overwriting capture
+  metadata. Replay/show use original capture/source/link, label saved/not live,
+  and never fetch, greet, write or advance history/rotation.
+  Mutations use the shared state lock; busy normal snapshots do not replace
+  replay. Eleven regression tests plus standalone command checks pass.
+  See `docs/bookmarks.md` for size/locking/partial-save behavior.
   Dependencies: T017.
-- [ ] **T040 [P3] Offer an optional full-screen topic picker.**
+- [x] **T040 [P3] Offer an optional full-screen topic picker.**
   Retain the line-based picker as a non-TTY/SSH fallback; keep keyboard
   navigation, accessibility and cancellation predictable.
   Test selection, cancellation without profile loss, resize, and fallback.
-  **Ask first:** desired interaction, dependency budget, and whether the
-  existing numbered picker is already sufficient?
+  **Approved 2026-10-22:** arrow keys move, Space toggles, Enter confirms; no
+  new dependencies; retain numbered prompt for non-TTY/unsupported terminals.
+  `q`/Ctrl-C cancel before saving. Picker redraw reads current terminal height
+  and scrolls on resize; terminal mode is restored on every exit.
+  **Implemented and tested:** state/key/render tests plus real PTY selection,
+  live resize, cancellation with existing-profile preservation, and canonical
+  mode/echo restoration. See `make test-shell`.
   Dependencies: T019, T021.
-- [ ] **T041 [P3] Evaluate optional AI summaries.**
+- [x] **T041 [P3] Evaluate optional AI summaries.**
   Only proceed with explicit interest: preserve headline/link mode and label
   generated summaries. Define publisher-content handling, privacy, provider,
   cost controls, credentials, and failure behavior before implementation.
   Test opt-in/out, timeouts, rate/cost limits, attribution, and untrusted output.
   **Ask first:** is AI needed at all, local versus hosted model, data-sharing
   permission, budget and credential storage? Never make it mandatory.
+  **Decision 2026-10-22:** evaluation only; do not implement or call an AI
+  provider. Keep headline/source/link behavior, send no content externally,
+  budget $0, and require a later explicit opt-in/provider decision before any
+  implementation. If revisited, only public headline/topic/source/link
+  metadata is in scope unless separately approved; no article text. A hosted
+  credential may only be supplied through an environment variable if later
+  authorized. See `docs/ai-summaries.md`.
+  **Evaluation complete:** current headline/link workflow is sufficient.
+  Metadata-only generation has limited value, while article-text summarization
+  introduces fetching/extraction, copyright, privacy, credential, cost and
+  failure-handling obligations disproportionate to this small CLI.
   Dependencies: T025.
 
 ### Suggested milestones (not authorization to start)
@@ -330,8 +394,10 @@ standalone command; personal profile/cache were not used for verification.
 1. **Reliability:** T015-T018.
 2. **Display polish:** T019-T022.
 3. **Release foundations:** T025-T030 and T033.
-4. **Public launch:** T031, T034-T035 when publication is approved.
-5. **Optional work:** T023-T024, T032 and T036-T041, based on user priorities.
+4. **Presentation/release preparation:** T034 complete, T035 drafts ready
+   but release gated. T031 cancelled; external publication not authorized.
+5. **Optional work:** T023-T024 complete; T032 local tools ready but real
+   signing blocked; T036-T041 complete (T041 is evaluation-only; no AI code).
 
 Do not add a backend, Kubernetes deployment, telemetry, or an AI subscription
 solely to increase apparent project complexity. A polished `v0.1.0` is the
@@ -367,7 +433,7 @@ proposed target, subject to the release decisions above.
   spaces, staged installs, onboarding, and explicit options; rerun race
   tests/vet; install the standalone command locally.
 - T011 depends on T006; T010 documents T011; T012 depends on T010/T011.
-- Homebrew tap publication remains a release task, not an existing service.
+- Historical tap proposal was cancelled on 2026-10-19; use `make install`.
 
 ## Follow-up: personalized greetings (2026-10-14)
 

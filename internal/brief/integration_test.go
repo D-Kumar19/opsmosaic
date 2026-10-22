@@ -243,6 +243,9 @@ func TestSchedulePlistAndOwnership(t *testing.T) {
 	home := t.TempDir()
 	path := filepath.Join(home, "refresh.plist")
 	content := schedulePlist("/tmp/space & quotes\"/opsmosaic", Store{"/tmp/config", "/tmp/cache"}, "/tmp/log")
+	if !strings.Contains(content, "<key>Label</key><string>io.github.d-kumar19.opsmosaic.refresh</string>") {
+		t.Fatal("launch agent must use the personal project identifier")
+	}
 	os.WriteFile(path, []byte(content), 0600)
 	if err := validateScheduleFile(path); err != nil {
 		t.Fatal(err)

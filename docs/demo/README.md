@@ -41,5 +41,5 @@ prompt/reply handling, errors, missing prompts, timeouts and output contracts.
 
 The rendering tool is macOS-only; this is not a new platform restriction on the
 Go CLI. `make ci` stays independent from optional media-generation tools.
-Review the generated assets before committing. Keep them on project infrastructure;
-generation does not push or upload anything.
+Review the generated assets before committing.
+Generation does not push or upload anything.

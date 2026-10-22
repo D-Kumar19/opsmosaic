@@ -54,15 +54,77 @@ read: a practical tip, relevant news, and project releases with original links.
   automatically while keeping textual greetings. `--color=auto|always|never`
   uses subtle cyan headings, warm greetings and dim metadata; plain output and
   nonempty `NO_COLOR` override color, even `always`. Empty `NO_COLOR` does not.
-- REQ-010: Keep source and artifacts on project infrastructure with visibility
-  unchanged and no external publication. Add the approved MIT source license,
+- REQ-010: Use the personal project repository at
+  `https://github.com/D-Kumar19/opsmosaic`. Retain the MIT source license,
   contributor guidance, SemVer/changelog and truthful support documentation.
   `--version` reports dev/release version, commit and UTC build time without
   onboarding, network or state changes. Provide portable local CI checks and
   isolated four-target release/archive/checksum tests. Package dependency
   licenses and require clean committed source; never overwrite a version.
-  Remote CI requires verified project runners and success/failure evidence.
+  Remote CI requires configured runners and verified success/failure evidence.
   Tagging, pushing and uploading require separate explicit approval.
+- REQ-011: Prepare an animated terminal demo, accessible text
+  transcript, project summary and draft release notes. Capture real CLI output
+  with a disposable example profile, one random item and offline return;
+  do not capture the user's shell or state. Clearly label draft release status
+  and distinguish measured evidence from unverified claims. A Homebrew tap is
+  not planned; retain standalone source installation.
+
+- REQ-012: Explicit shell install/uninstall commands support zsh/bash and an
+  explicitly chosen regular configuration file. Preserve unrelated content and
+  permissions, back up the original, reject ambiguous markers/symlinks and
+  avoid duplicate managed blocks. Hooks run only in interactive terminal
+  sessions; missing executable/profile skips, failures stay visible. Greeting
+  every terminal is offline and never starts onboarding.
+- REQ-013: Opt-in macOS launchd refresh every three hours, enable/disable/status
+  with private logs and pinned executable/state paths. Do not enable any real
+  job during implementation. Refresh uses existing profile and bounded locking,
+  preserves cache on failures, reports errors, and never advances greeting or
+  recent-item history. No Linux scheduler or suppression window in this scope.
+- REQ-014: Prepare optional local OpenSSH signatures over release checksums,
+  verifying independently trusted identity/namespace before archive hashes.
+  Refuse overwrite and unsafe manifest paths; test unsigned/wrong-key/tampered
+  failures using disposable keys only. Real signing/provenance stays blocked on
+  T030 and approval of publisher trust/key custody. No Apple signing is implied.
+
+- REQ-015: `doctor [--json]` reports local executable/build/platform, redacted
+  state paths, profile validity and cached-source ages/status without network,
+  onboarding, locking or writes. Omit profile values, headlines/URLs and raw
+  parser errors. Replace home path prefixes with `~`; document remaining path
+  disclosure. Missing/stale state warns with success; invalid/unreadable state
+  returns an error after a structured report. JSON has a versioned tested shape.
+
+- REQ-016: Add/list/remove up to 20 custom RSS/Atom feeds in separate versioned
+  local JSON; supplement built-ins, preserve profiles and map each source to
+  one existing topic and news/release. Reject duplicate definitions/URLs,
+  invalid schema and unsafe URLs explicitly. Public HTTPS/443 only, no
+  credentials/query strings/fragments, authenticated/internal feeds or plugins.
+  Enforce public DNS/IP pinning and safe redirects; bound concurrency and reuse
+  cache/offline/failure/sanitization/selection behavior across normal and
+  scheduled runs. Doctor validates privately with positional custom-source IDs.
+
+- REQ-017: Keep existing defaults; `--stable-only` filters only RELEASE items
+  to recognized stable SemVer labels including supported component prefixes.
+  Explicit release-tag URLs take precedence over titles; reject prereleases
+  and unknown/ambiguous formats. Apply after cache loading/fetching and before
+  selection, including customs/offline/refresh; preserve all source cache
+  entries, news and tips. Retain explicit empty-news failure and mixed tip
+  fallback with an informative filtering message. No persisted filter setting.
+
+- REQ-018: Persist the complete last normal briefing independently of cache.
+  `replay` and `bookmarks show ID` render original content/source/link and
+  capture/publication times as saved, not live, without greeting, network,
+  history/rotation changes or writes. `bookmarks add [ITEM_NUMBER]` requires a
+  1-based index for multi-item briefings; list/remove use stable IDs. Keep up to
+  100 until manual removal, reuse duplicates and reject full additions without
+  eviction. Lock mutations, preserve bookmarks on later briefings, validate
+  private atomic state, and surface errors without silent resets.
+- REQ-019: On interactive supported terminals, offer an accessible full-screen
+  topic picker using arrow keys to move, Space to toggle, Enter to confirm,
+  and `q`/Ctrl-C to cancel without saving. Use no new dependency. Re-evaluate
+  terminal dimensions on redraw and scroll the topic list when needed. For
+  piped/non-interactive input or unsupported terminals, retain the numbered
+  prompt. Preserve validation and existing-profile contents on cancellation.
 
 ## Acceptance scenarios
 
@@ -98,6 +160,5 @@ license for republishing full articles.
 
 ## Later possibilities
 
-Arrow-key multi-selection, opt-in
-shell greeting, user-supplied feeds, bookmarks, remote release publishing, and optional
+Arrow-key multi-selection, bookmarks, remote release publishing, and optional
 AI summaries. These are backlog items, not first-release requirements.

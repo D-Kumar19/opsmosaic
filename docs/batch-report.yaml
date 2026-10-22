@@ -1,3 +1,141 @@
+ai_summary_evaluation:
+  batch_id: B15
+  date: "2026-10-22"
+  completed_tasks: [T041]
+  blocked_tasks: []
+  files_changed:
+    T041:
+      - {file: docs/ai-summaries.md, change_type: created, description: Evaluation decision, privacy/cost tradeoffs and explicit revisit criteria}
+    supporting_documentation: [README.md, docs/plan.md, docs/testing.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  user_decision:
+    scope: evaluation_only
+    provider: none
+    external_content_sharing: none
+    budget: "$0"
+    future_credential_policy: environment_variable_only_if_separately_approved
+    future_invocation: explicit_per_run_opt_in
+    future_failure_behavior: retain_headline_link_warn_and_continue
+    article_text: not_approved
+  evaluation:
+    current_choice: retain_headline_source_link_workflow; no AI implementation
+    rationale: Metadata-only summaries add limited value; article summarization adds fetching, copyright, privacy, provider, cost and failure obligations.
+    provider_cost_estimate: unavailable_no_provider_selected
+    runtime_cost: "$0"
+  test_results:
+    command: "Documentation-only decision; no runtime code changed"
+    passed: 0
+    failed: 0
+    skipped: 0
+    failures: []
+  validation:
+    local_links: passed
+    runtime_behavior_changed: false
+    ai_calls_made: false
+    credentials_created: false
+    external_data_shared: false
+    protocol_violation: false
+    errors: []
+    warnings: []
+topic_picker_follow_up:
+  batch_id: B14
+  date: "2026-10-22"
+  completed_tasks: [T040]
+  blocked_tasks: []
+  files_changed:
+    T040:
+      - {file: internal/brief/onboard.go, change_type: modified, description: Interactive TTY detection with unchanged numbered fallback}
+      - {file: internal/brief/picker.go, change_type: created, description: Dependency-free arrow/Space/Enter topic picker with scrolling and terminal restoration}
+      - {file: internal/brief/picker_wait_unix.go, change_type: created, description: Bounded escape-sequence reads on macOS/Linux}
+      - {file: internal/brief/picker_wait_other.go, change_type: created, description: Unsupported-platform picker fallback}
+      - {file: internal/brief/picker_test.go, change_type: created, description: Navigation, toggle, cancel, scroll, sanitization and fallback tests}
+      - {file: internal/brief/app.go, change_type: modified, description: Pass actual terminal input to onboarding}
+      - {file: scripts/test-shell.py, change_type: modified, description: Real PTY selection, resize, cancellation and terminal-mode checks}
+      - {file: scripts/demo.py, change_type: modified, description: Preserve line-oriented accessible demo capture}
+    documentation: [README.md, CHANGELOG.md, CONTRIBUTING.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: User-approved arrow navigation, Space/Enter, no dependencies, numbered fallback}
+      - {artifact: docs/spec.md, used_for: REQ-019 and preserving profile on cancel}
+      - {artifact: docs/constitution.md, used_for: Local-first dependency-free implementation}
+  evidence_mapping:
+    T040: [TestPickerStateNavigationAndSelection, TestPickerWraparoundCancelAndKeySequences, TestPickerRenderingScrollsAndSanitizes, TestOnboardNumberedFallbackUnchanged, scripts/test-shell.py]
+  traceability:
+    - {requirement: REQ-019, task: T040, status: completed}
+  test_results:
+    B14:
+      command: "make ci; make test-shell; make test-release; make test-demo; go test -json ./..."
+      passed: 157
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 87.7
+  validation:
+    local_ci: passed
+    release_fixture: passed
+    demo_tools: passed
+    real_shell_ptys: passed
+    live_resize: passed
+    personal_profile_modified: false
+    personal_shell_modified: false
+    committed: false
+    pushed: false
+    published: false
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Interactive raw-mode picker is enabled only on supported macOS/Linux terminals; other input uses numbered prompt.}
+    - {severity: HIGH, message: Remote release/CI/signing blockers remain outstanding; nothing was published.}
+bookmarks_follow_up:
+  batch_id: B13
+  date: "2026-10-19"
+  completed_tasks: [T039]
+  blocked_tasks: []
+  files_changed:
+    T039:
+      - {file: internal/brief/saved.go, change_type: created, description: Independent validated snapshot/bookmark persistence and commands}
+      - {file: internal/brief/saved_test.go, change_type: created, description: Eleven hermetic persistence and replay tests}
+      - {file: internal/brief/app.go, change_type: modified, description: Complete last-briefing persistence without bookmark loss}
+      - {file: internal/brief/display.go, change_type: modified, description: Original capture metadata and no-greeting saved display}
+      - {file: internal/brief/doctor.go, change_type: modified, description: Private saved-state validation}
+      - {file: internal/brief/brief_test.go, change_type: modified, description: Complete article fixtures for snapshot validation}
+      - {file: internal/brief/reliability_test.go, change_type: modified, description: Complete article fixtures for snapshot validation}
+      - {file: scripts/test-install.sh, change_type: modified, description: Installed replay and all bookmark operations with scoped cleanup}
+      - {file: docs/bookmarks.md, change_type: created, description: Commands retention privacy and interruption contract}
+    documentation: [README.md, CHANGELOG.md, CONTRIBUTING.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/doctor.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: T039 user-approved commands retention and history behavior}
+      - {artifact: docs/spec.md, used_for: REQ-018 and preservation of single-item default}
+      - {artifact: docs/constitution.md, used_for: Local-first atomic state and standard-library implementation}
+  evidence_mapping:
+    T039: [TestSavedBriefingReplayAndBookmarks, TestSavedSingleItemDuplicatesAndFullLimit, TestSavedConcurrentEditsAndBusyReplay, TestSavedContentSurvivesSourcesAndSanitizes, TestSavedFailureAndNonBriefingPreserveSnapshot, scripts/test-install.sh]
+  traceability:
+    - {requirement: REQ-018, task: T039, status: completed}
+  test_results:
+    B13:
+      command: "make ci; go test -json ./..."
+      passed: 153
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 91.5
+  validation:
+    local_ci: passed
+    release_fixture: passed
+    real_shell_ptys: passed
+    local_install: passed
+    committed: false
+    pushed: false
+    tagged: false
+    published: false
+    personal_profile_modified: false
+    personal_shell_modified: false
+    scheduler_enabled: false
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Cache/history and saved snapshots are separate atomic files; partial-save errors are explicit and documented.}
+    - {severity: HIGH, message: Remote CI release and production signing prerequisites remain blocked; no publication performed.}
 batch_id: B01
 completed_tasks: [T001, T002, T003, T004, T005, T006, T007, T008]
 blocked_tasks: []
@@ -71,6 +209,56 @@ validation:
   live_sources: 9
   offline_smoke: passed
   invalid_argument_exit: passed
+  personal_state_modified: false
+presentation_follow_up:
+  batch_id: B08
+  date: "2026-10-19"
+  completed_tasks: [T034]
+  cancelled_tasks: [T031]
+  blocked_tasks: [T035]
+  files_changed:
+  T034: [scripts/demo.py, scripts/render-demo.swift, scripts/test-demo.py, Makefile, .gitignore, docs/demo/README.md, docs/demo/terminal.gif, docs/demo/transcript.txt, README.md, CONTRIBUTING.md]
+  T035: [docs/release-notes.md, docs/project-summary.md, docs/releases.md, docs/plan.md, docs/spec.md, docs/testing.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+  implementation:
+    - {artifact: docs/plan.md, used_for: User-approved animated demo and draft materials; Homebrew cancelled}
+    - {artifact: docs/spec.md, used_for: REQ-011 and preservation of one-item/offline behavior}
+  evidence_mapping:
+  T034: [Five demo-tool tests, actual isolated PTY capture, decoded GIF frames and timing checks, text transcript and visual review]
+  T035: [Draft release notes and project summary; T030 dependency remains blocked]
+  traceability:
+  - {requirement: REQ-011, task: T034, status: completed}
+  - {requirement: REQ-011, task: T035, status: blocked}
+  protocol_violation: false
+  errors: []
+  warnings:
+  - {severity: HIGH, message: Real release remains blocked by T030/T027 and requires separate publication approval.}
+  - {severity: LOW, message: Optional GIF rendering requires macOS Swift/AppKit and Python 3; installed CLI has no new dependency.}
+  test_results:
+  demo_tools:
+    command: make test-demo
+    passed: 5
+    failed: 0
+    skipped: 0
+    failures: []
+  animation:
+    command: make demo
+    frames: 3
+    width: 1100
+    height: 880
+    loop_duration_seconds: 21
+    output_shape: passed
+    visual_review: passed
+  validation:
+  phase_three_commit: 672fcfe
+  phase_four_committed: false
+  local_ci: passed
+  release_fixture: passed
+  local_markdown_links: passed
+  yaml_task_totals: passed
+  pushed: false
+  tagged: false
+  uploaded: false
   personal_state_modified: false
   editor_problems: 0
 follow_up:
@@ -292,10 +480,10 @@ release_foundations_follow_up:
     T033: [CONTRIBUTING.md, docs/testing.md, docs/architecture.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
   upstream_artifacts_consumed:
     implementation:
-      - {artifact: docs/plan.md, used_for: Approved repository-scoped release scope and T025-T030/T033}
+      - {artifact: docs/plan.md, used_for: Release foundations scope and T025-T030/T033}
       - {artifact: docs/spec.md, used_for: REQ-010 and preservation of existing briefing behavior}
   evidence_mapping:
-    T025: [User approved retaining project host and current visibility; repository API checked read-only]
+    T025: [Repository destination and access reviewed; current destination documented in project plan]
     T026: [Approved MIT license and source/article rights distinction]
     T027: [make ci passes locally; deliberate formatting failure rejected; remote runner blocked]
     T028: [TestVersionWithoutState, TestVersionMetadataAndInvalidArguments, four archive metadata checks]
@@ -308,7 +496,7 @@ release_foundations_follow_up:
   protocol_violation: false
   errors: []
   warnings:
-    - {severity: HIGH, message: No verified project runner; remote CI workflow and successful/failing remote runs remain blocked.}
+    - {severity: HIGH, message: Remote CI workflow and successful/failing remote runs remain outstanding.}
     - {severity: LOW, message: Go 1.24 and native non-arm64-macOS matrix remain unverified; local compiler was Go 1.27.2.}
   test_results:
     B07:
@@ -333,3 +521,167 @@ release_foundations_follow_up:
     tagged: false
     uploaded: false
     personal_state_modified: false
+stable_filter_follow_up:
+  batch_id: B12
+  date: "2026-10-19"
+  completed_tasks: [T038]
+  blocked_tasks: []
+  files_changed:
+    T038: [internal/brief/releases.go, internal/brief/releases_test.go, internal/brief/app.go, scripts/test-install.sh, README.md, CHANGELOG.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/custom-feeds.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved per-run stable-only opt-in with unchanged defaults and unknown-format exclusion}
+      - {artifact: docs/spec.md, used_for: REQ-017}
+  evidence_mapping:
+    T038: [Five focused label/adapter/offline/refresh/empty-result tests and installed flag smoke]
+  traceability:
+    - {requirement: REQ-017, task: T038, status: completed}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Conservative version-label recognition excludes ambiguous prose/nested formats; it is not a publisher stability guarantee.}
+  test_results:
+    B12:
+      command: make ci; make test-release; go test -json ./...
+      passed: 142
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 90.9
+  validation:
+    local_ci: passed
+    release_fixture: passed
+    user_local_reinstall: passed
+    personal_state_modified: false
+    pushed: false
+    tagged: false
+    uploaded: false
+    changes_committed: false
+custom_feeds_follow_up:
+  batch_id: B11
+  date: "2026-10-19"
+  completed_tasks: [T036]
+  blocked_tasks: []
+  files_changed:
+    T036: [internal/brief/custom_feeds.go, internal/brief/custom_feeds_test.go, internal/brief/public_feed.go, internal/brief/feed.go, internal/brief/app.go, internal/brief/integration.go, internal/brief/doctor.go, scripts/test-install.sh, docs/custom-feeds.md, README.md, CHANGELOG.md, CONTRIBUTING.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/doctor.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved additive CLI configuration, existing-topic news/release mapping, public HTTPS/no-query policy and 20-feed bound}
+      - {artifact: docs/spec.md, used_for: REQ-016}
+  evidence_mapping:
+    T036: [Eleven custom-feed tests using local fixtures and injected DNS/dial, standalone feed commands, concurrent configuration edits, cache/offline/doctor integration]
+  traceability:
+    - {requirement: REQ-016, task: T036, status: completed}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Custom feeds intentionally use direct public HTTPS without environment proxies; internal/authenticated/query-bearing feeds are unsupported.}
+    - {severity: LOW, message: Configuration and cache pruning are individually atomic but not one cross-file transaction; interruption may require a feed refetch.}
+    - {severity: LOW, message: Public-source availability is not asserted by hermetic tests; Go 1.24 and native non-macOS-arm64 matrix remain unverified.}
+  test_results:
+    B11:
+      command: make ci; make test-release; make test-shell; make test-signing; go test -json ./...
+      passed: 137
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 90.7
+  validation:
+    local_ci: passed
+    release_fixture: passed
+    actual_shells: passed
+    disposable_key_signing: passed
+    user_local_reinstall: passed
+    personal_custom_feeds_modified: false
+    personal_profile_modified: false
+    external_test_requests: false
+    pushed: false
+    tagged: false
+    uploaded: false
+    changes_committed: false
+doctor_follow_up:
+  batch_id: B10
+  date: "2026-10-19"
+  completed_tasks: [T037]
+  blocked_tasks: []
+  files_changed:
+    T037: [internal/brief/doctor.go, internal/brief/doctor_test.go, internal/brief/app.go, scripts/test-install.sh, docs/doctor.md, README.md, CHANGELOG.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved T037 local-only human/JSON diagnostics and warning/error policy}
+      - {artifact: docs/spec.md, used_for: REQ-015}
+  evidence_mapping:
+    T037: [Seven focused Go tests, exact top-level JSON contract and privacy sentinels, local CI and standalone installation]
+  traceability:
+    - {requirement: REQ-015, task: T037, status: completed}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Diagnostics are local file snapshots, not live source probes; paths outside home can reveal directory names.}
+  test_results:
+    B10:
+      command: make ci; make test-release; go test -json ./...
+      passed: 126
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 91.0
+  validation:
+    local_ci: passed
+    release_fixture: passed
+    user_local_reinstall: passed
+    network_requests: false
+    personal_state_modified: false
+    pushed: false
+    tagged: false
+    uploaded: false
+    changes_committed: false
+optional_integrations_follow_up:
+  batch_id: B09
+  date: "2026-10-19"
+  completed_tasks: [T023, T024]
+  blocked_tasks: [T032]
+  files_changed:
+    T023: [internal/brief/integration.go, internal/brief/integration_test.go, internal/brief/app.go, scripts/test-shell.py, scripts/test-install.sh, docs/shell-integration.md]
+    T024: [internal/brief/integration.go, internal/brief/integration_test.go, internal/brief/store.go, docs/shell-integration.md]
+    T032: [scripts/sign-release.sh, scripts/verify-release.sh, scripts/check-release.sh, scripts/test-signing.sh, docs/signing.md]
+    shared: [Makefile, README.md, CONTRIBUTING.md, CHANGELOG.md, docs/spec.md, docs/plan.md, docs/architecture.md, docs/testing.md, docs/project-summary.md, docs/release-notes.md, docs/checkpoints/tasks-to-impl.yaml, docs/batch-report.yaml]
+  upstream_artifacts_consumed:
+    implementation:
+      - {artifact: docs/plan.md, used_for: Approved opt-in zsh/bash installation and three-hour macOS schedule; local-only signing preparation}
+      - {artifact: docs/spec.md, used_for: REQ-012 through REQ-014}
+  evidence_mapping:
+    T023: [Go hook lifecycle/error tests, actual bash/zsh PTY tests, standalone installation tests]
+    T024: [Plist lint and simulated launchctl lifecycle, local HTTP success/failure cache tests, unchanged greeting/history and busy-lock/cancellation tests]
+    T032: [Disposable OpenSSH-key tests verify trust and reject unsigned/wrong-key/tampered/unsafe-path/overwrite cases]
+  traceability:
+    - {requirement: REQ-012, task: T023, status: completed}
+    - {requirement: REQ-013, task: T024, status: completed}
+    - {requirement: REQ-014, task: T032, status: blocked}
+  protocol_violation: false
+  errors: []
+  warnings:
+    - {severity: LOW, message: Actual launchd activation was intentionally not enabled; lifecycle tested through injected runner and plist validation.}
+    - {severity: HIGH, message: T032 real release signing remains blocked on T030 and approved production key trust/custody. No signing/provenance claim is made for a real release.}
+    - {severity: LOW, message: Expanded core coverage is 90.4 percent versus historical phase-three 94.1 percent; tests pass but native launchctl/rare I/O error branches remain unexercised.}
+  test_results:
+    B09:
+      command: make ci; make test-shell; make test-signing; make test-release; go test -json ./...
+      passed: 119
+      failed: 0
+      skipped: 0
+      failures: []
+      core_statement_coverage_percent: 90.4
+      actual_shells: [bash, zsh]
+      scheduler: simulated_launchctl_with_native_plist_lint
+      signing_keys: disposable_test_only
+  validation:
+    user_local_reinstall: passed
+    actual_shell_configuration_modified: false
+    actual_scheduler_enabled: false
+    production_key_created: false
+    real_release_signed: false
+    pushed: false
+    tagged: false
+    uploaded: false
+    changes_committed: false

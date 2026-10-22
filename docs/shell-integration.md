@@ -68,6 +68,10 @@ Paths:
 - Agent: `~/Library/LaunchAgents/io.github.d-kumar19.opsmosaic.refresh.plist`
 - Combined stdout/stderr log: `~/Library/Logs/opsmosaic/refresh.log`
 
+If upgrading from a build with a different agent identifier, disable its job
+using that build before enabling this one. The new identifier does not discover
+or remove differently named jobs. No scheduler is enabled automatically.
+
 Logs remain on disable; inspect and rotate/remove the log manually as needed.
 No automatic log rotation is configured. Logs may contain feed URLs/headlines;
 keep them private. The job uses umask 077 for newly created files.

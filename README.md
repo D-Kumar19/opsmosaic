@@ -6,6 +6,17 @@ A personal terminal briefing for DevOps, cloud, security, and AI. Choose your
 interests, get practical tips and current headlines, and follow links to the
 original sources. Built in Go with small terminal/Unicode display libraries:
 no account, API key, external runtime, or AI subscription.
+The AI topic selects AI-related news; it does not generate summaries. See the
+[AI-summary decision](docs/ai-summaries.md).
+
+## See it in action
+
+![OpsMosaic terminal demo with an example Alex profile, topic selection, one tip and an offline return.](docs/demo/terminal.gif)
+
+[Text transcript and regeneration instructions](docs/demo/README.md).
+This is actual CLI output rendered as a three-scene animation, using disposable
+state and no network. The offline scene deliberately retains the empty-news
+warning because no news cache is seeded.
 
 ## Install on macOS
 
@@ -29,7 +40,7 @@ xcode-select --install
 
 ### 2. Clone and install
 
-For users with access to the project-hosted repository:
+Clone the project repository:
 
 ```sh
 git clone https://github.com/D-Kumar19/opsmosaic.git
@@ -63,10 +74,8 @@ For bash, put the same PATH line in `~/.bash_profile` and reload that file.
 ### Homebrew tap status
 
 Homebrew above installs the Go build tool, not OpsMosaic itself. There is
-**no published OpsMosaic tap yet**, so no `brew tap` / `brew install opsmosaic`
-command is advertised as working. A dedicated tap requires a published
-formula and accessible source or release artifacts; this is tracked in the
-[release backlog](docs/plan.md). For now, `make install` is the supported path.
+**no OpsMosaic tap planned**, so no `brew tap` / `brew install opsmosaic`
+command is advertised as working. `make install` is the supported path.
 
 ### Updating, custom locations, and uninstalling
 
@@ -94,25 +103,45 @@ rm "$HOME/.local/bin/opsmosaic"
 This leaves your preferences/cache intact. For a custom prefix, remove only
 the `opsmosaic` executable at that prefix.
 
+## Bookmarks and replay
+
+```sh
+opsmosaic replay                    # Last complete briefing, no new greeting
+opsmosaic bookmarks add             # Save the last single item
+opsmosaic bookmarks add 2           # Explicit item number for a multi-item run
+opsmosaic bookmarks list
+opsmosaic bookmarks show <ID> --plain
+opsmosaic bookmarks remove <ID>
+```
+
+Saved output retains its original source/link and capture time, is labeled
+**saved, not live news**, and never fetches or advances history/greetings.
+Bookmarks persist independently of feed cache until removed (maximum 100,
+no automatic eviction). See [storage and duplicate rules](docs/bookmarks.md).
+
 ## First run
 
-Enter your own name (shown below as `<YOUR NAME>`) and choose comma-separated
-topic numbers. Names are not hardcoded or shared between users.
+Enter your own name (shown below as `<YOUR NAME>`). In an interactive macOS or
+Linux terminal,
+move through the topics with the arrow keys, press Space to select or deselect,
+and Enter to continue. Press `q` or Ctrl-C to cancel without saving changes.
+Piped/non-interactive input keeps the numbered topic prompt.
 
 ```text
 What should I call you? <YOUR NAME>
 
-Choose your interests:
-  1. Docker
-  2. Kubernetes
-  3. AWS
-  4. Security
-  5. Helm
-  6. Argo CD
-  7. Kargo
-  8. Crossplane
-  9. AI
-Topic numbers (comma-separated, e.g. 1,2,3): 2,3,4,9
+Choose your interests, <YOUR NAME>
+Use ↑/↓ to move, Space to select, Enter to continue; q or Ctrl-C cancels.
+Select one or more topics:
+   [ ] Docker
+ > [x] Kubernetes
+   [x] AWS
+   [x] Security
+   [ ] Helm
+   [ ] Argo CD
+   [ ] Kargo
+   [ ] Crossplane
+   [x] AI
 ```
 
 Runs greet you with your name, local date/time and timezone, plus a small
@@ -154,12 +183,16 @@ mixed mode shows one tip followed by available news/releases.
 ```sh
 opsmosaic --tips
 opsmosaic --news --topic ai,security
+opsmosaic --news --topic helm,argocd --stable-only
 opsmosaic --topic kubernetes,helm --count 5
 opsmosaic --offline
 opsmosaic refresh
 opsmosaic config
 opsmosaic --help
 opsmosaic --version
+opsmosaic doctor
+opsmosaic doctor --json
+opsmosaic feeds list
 opsmosaic --detailed
 opsmosaic --plain
 opsmosaic --color=never
@@ -212,7 +245,26 @@ go install ./cmd/opsmosaic
 opsmosaic
 ```
 
+## Optional terminal startup and background refresh
+
+For installation/profile/cache problems, run `opsmosaic doctor` or
+`opsmosaic doctor --json`. These [local diagnostics](docs/doctor.md) never fetch,
+onboard or change state. Missing/stale data warns; corrupt/unreadable state
+fails explicitly. Home paths are abbreviated, but review output before sharing.
+
+Opt-in zsh/bash setup/removal and macOS refresh every three hours are available.
+Nothing is enabled automatically. See [shell and scheduling instructions](docs/shell-integration.md)
+before running setup commands, especially if you already have a manual hook.
+Terminal greetings stay offline; scheduled jobs update cache without advancing
+display history or greeting rotation. Existing personal shell files are unchanged.
+
 ## Sources and safety
+
+Add public, unauthenticated RSS/Atom sources using
+[`opsmosaic feeds add/list/remove`](docs/custom-feeds.md). Custom feeds
+supplement built-ins and map to existing topics as news or releases. Up to 20
+are allowed; HTTPS/443 without credentials, queries or private/local destinations
+is required. Cached custom items work offline and participate in scheduled refresh.
 
 | Topic | Source | Content |
 |---|---|---|
@@ -230,6 +282,23 @@ AI coverage scans at most 30 HN top stories using AI-related title keywords:
 it is deliberately lightweight, not an exhaustive or authoritative AI news
 index. A feed can have no matching stories. Release feeds may include
 prereleases; the upstream version label is preserved.
+
+Use `--stable-only` to exclude prerelease and unknown-format **RELEASE** items
+for that run. Tips and news are unaffected, including articles about beta
+versions. Defaults still include upstream prereleases. The filter applies to
+built-in/custom feeds, offline cache and explicit refresh without deleting
+anything from cache or changing your preferences.
+
+Recognition is conservative: an explicit `/releases/tag/` URL takes precedence
+over the title. Otherwise the complete title must be a stable SemVer label,
+optionally starting with `Release `. Supported examples include `v1.2.3`,
+`1.2.3+build.1`, `helm-v3.16.0`, `component/v1.2.3` and `component@1.2.3`.
+Component prefixes use ASCII letters/digits/underscores/hyphens; arbitrarily
+nested prefixes, dates, prose and incomplete versions are excluded.
+Prerelease suffixes and alpha/beta/RC/nightly/dev/snapshot/preview prefix
+markers are excluded. This recognizes version labels, not a publisher's
+stability guarantee. If news-only mode has no matching items, it fails
+explicitly; mixed mode can still show a tip with an empty-news warning.
 
 News contains headlines, source attribution, timestamps when available, and
 links, not copied article bodies or AI summaries. Respect publishers' terms.
@@ -311,16 +380,18 @@ See [test cases](docs/testing.md), [project context](docs/spec.md),
 [architecture](docs/architecture.md), [principles](docs/constitution.md),
 and [implementation TODOs](docs/plan.md).
 
-The topic picker is SSH-friendly and numbered. The renderer uses
+The topic picker supports arrow-key selection with a numbered non-TTY fallback.
+The renderer uses
 [`x/term`](https://pkg.go.dev/golang.org/x/term) for terminal detection and
 [`uniseg`](https://pkg.go.dev/github.com/rivo/uniseg) for Unicode display widths;
 their Go dependencies are compiled into the standalone executable.
-A full-screen picker, custom feeds, and remote release publishing remain on the backlog.
+Custom feeds are supported; remote CI and release publishing remain outstanding.
 
 ## Versioning, releases, and contributions
 
-The code remains on project infrastructure; do not mirror it externally. Repository
-visibility is unchanged. Source builds report `dev`; `opsmosaic --version`
+OpsMosaic is a personal project hosted at
+[D-Kumar19/opsmosaic](https://github.com/D-Kumar19/opsmosaic).
+Source builds report `dev`; `opsmosaic --version`
 shows version, commit and build time without onboarding or network requests.
 
 `v0.1.0` is the proposed first release, not an existing tag. Local archives for
@@ -329,10 +400,17 @@ macOS/Linux arm64/amd64 can be generated from a clean committed checkout using
 See [release policy and verification](docs/releases.md) before distribution.
 Cross-compiled targets are not yet native-runtime-certified.
 
-`make ci` runs portable checks locally. Remote GitHub Actions wiring is
-**blocked pending a verified project runner**; there is no live CI badge or claimed
+`make ci` runs portable checks locally. Remote GitHub Actions wiring and
+successful/failing run verification are still outstanding; there is no live CI badge or claimed
 remote matrix result. See [CI readiness](docs/ci.md).
 
 See [contributor instructions](CONTRIBUTING.md), [changelog](CHANGELOG.md),
 and the [MIT source-code license](LICENSE). The code license does not cover
-third-party article bodies or bypass maintainer publication requirements.
+third-party article bodies. Release publication requires maintainer approval.
+
+The [project summary](docs/project-summary.md) explains design trade-offs and
+measured verification. [Draft release notes](docs/release-notes.md) are not an
+announcement of an available release.
+
+[Optional local OpenSSH signing tools](docs/signing.md) are prepared and tested
+with disposable keys. No production signing identity or signed release exists.

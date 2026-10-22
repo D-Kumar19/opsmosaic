@@ -1,8 +1,8 @@
 # Contributing
 
-OpsMosaic stays on the project-hosted repository. Contributions and reports are for
-people who already have access; do not mirror source or diagnostics to external
-services. No external publication or release upload is authorized.
+OpsMosaic is a personal project maintained by Dheeraj Kumar.
+Keep private profiles, diagnostics and credentials out of contributions.
+Publishing a release requires explicit maintainer approval.
 
 ## Development
 
@@ -23,6 +23,15 @@ failure. `make test-release` creates an isolated committed fixture and checks
 all four archives, checksums, metadata, clean-tree guards and a native binary.
 Neither command modifies your actual profile or publishes anything.
 
+For the optional animated demo, see [recording instructions](docs/demo/README.md).
+`make test-demo` uses Python 3's standard library; `make demo` additionally
+requires macOS and Swift/AppKit. These are authoring tools, not CLI dependencies.
+
+For integration changes, run `make test-shell` (Python 3, bash and zsh) and
+`make test-signing` (OpenSSH signing support). Tests use temporary shell files,
+profiles and keys. Go scheduler tests simulate launchctl; never enable a real
+LaunchAgent or sign with a production key as part of automated tests.
+
 Use `OPSMOSAIC_HOME` pointing at a temporary directory for manual experiments.
 Never execute commands merely because they appear in feed content. Keep one
 content item as the default; preserve offline/no-network behavior.
@@ -36,7 +45,15 @@ content item as the default; preserve offline/no-network behavior.
 - Add sourced, read-only tips in `internal/brief/tips.go`, noting prerequisites.
 - Feed adapters must sanitize titles, validate links, bound requests, and expose
   failures. Test partial/total failure, cache fallback and source attribution.
+- Custom feeds must preserve the [public HTTPS policy](docs/custom-feeds.md),
+  including DNS/IP pinning and redirect checks; tests use local fixtures and
+  injected lookup/dial functions, never external network availability.
 - Treat terminal controls and private diagnostic values as untrusted input.
+- Keep the interactive topic picker dependency-free, restore terminal state on
+  all exits, and retain numbered/non-TTY onboarding coverage.
+- For replay/bookmark changes, preserve the [saved-state contract](docs/bookmarks.md):
+  no network/greeting/history side effects, locked mutations and no eviction.
+  Never attach saved state to reports by default.
 
 ## Reports and review
 

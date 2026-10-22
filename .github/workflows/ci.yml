@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: ${{ matrix.os }} / Go ${{ matrix.go }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            go: 1.24.x
+            extended: false
+            shell: false
+          - os: ubuntu-24.04
+            go: stable
+            extended: true
+            shell: false
+          - os: macos-14
+            go: stable
+            extended: false
+            shell: true
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+      - name: Formatting, race tests, vet, build and installation
+        run: make ci
+      - name: Release packaging, signing-tool and demo tests
+        if: matrix.extended
+        run: make test-release test-signing test-demo
+      - name: Real bash/zsh and interactive picker tests
+        if: matrix.shell
+        run: make test-shell

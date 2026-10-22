@@ -215,9 +215,12 @@ standalone command; personal profile/cache were not used for verification.
   Verify the chosen runner executes the commands and a deliberate failure
   fails the job; do not claim CI is live before its remote run is checked.
   **Current scope:** configure GitHub Actions for the personal repository.
-  Intended matrix: Go 1.24.x/latest stable on native macOS/Linux.
-  **Outstanding:** workflow configuration, account permissions/usage checks,
-  and verified successful and intentional failing remote runs.
+  **Implemented:** pinned, read-only GitHub Actions workflow with Linux
+  Go 1.24.x/stable and macOS stable; 15-minute job timeouts, concurrency
+  cancellation, Linux packaging/signing-tool/demo tests and macOS PTY tests.
+  The minimum Go version runs on Linux only to conserve included minutes.
+  Actions is enabled according to the maintainer.
+  **Outstanding:** verified successful and intentional failing remote runs.
   `make ci` and deliberate local formatting failure pass verification;
   remote wiring and real success/failure runs remain outstanding. See `docs/ci.md`.
   Dependencies: T025.

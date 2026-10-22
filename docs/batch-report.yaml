@@ -1,3 +1,33 @@
+github_actions_setup:
+  batch_id: B16
+  date: "2026-10-22"
+  completed_tasks: []
+  blocked_tasks: [T027]
+  files_changed:
+    - .github/workflows/ci.yml
+    - docs/ci.md
+    - docs/plan.md
+    - docs/checkpoints/tasks-to-impl.yaml
+    - docs/batch-report.yaml
+  requirement: REQ-010
+  implementation:
+    triggers: [push_to_main, pull_request_to_main, workflow_dispatch]
+    matrix: [ubuntu_24_04_go_1_24, ubuntu_24_04_go_stable, macos_14_go_stable]
+    permissions: contents_read
+    pinned_actions: [checkout_v6, setup_go_v6]
+    timeout_minutes_per_job: 15
+    superseded_runs: cancelled
+    uploads_or_publication: none
+    secrets_required: false
+  validation:
+    workflow_lint: actionlint_v1.7.7_passed
+    local_commands: make_ci_test-release_test-signing_test-demo_test-shell_passed
+    demo_tests: {passed: 5, failed: 0}
+    core_coverage_percentage: 87.7
+    diff_check: passed
+    platform: macOS_arm64_Go_1.27.2
+    remote_runs: not_started
+  remaining_gate: Commit/push workflow and verify real successful and deliberate failing remote runs; T027 is not yet complete.
 ai_summary_evaluation:
   batch_id: B15
   date: "2026-10-22"

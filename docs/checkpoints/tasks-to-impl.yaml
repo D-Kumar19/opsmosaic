@@ -300,9 +300,9 @@ blocked_tasks:
     upstream_trace: {plan_item: Optional integrations, requirements: [REQ-014]}
   - task_id: T027
     status: blocked
-    reason: GitHub Actions workflow configuration and verified successful/intentional failing remote runs remain outstanding.
-    local_implementation: [scripts/ci.sh, Makefile, docs/ci.md]
-    verification: Local pipeline and intentional formatting-failure test passed on Go 1.27.2 macOS arm64.
+    reason: Workflow implemented; verified successful/intentional failing remote runs remain outstanding.
+    local_implementation: [.github/workflows/ci.yml, scripts/ci.sh, Makefile, docs/ci.md]
+    verification: actionlint v1.7.7 and all workflow make targets passed locally on Go 1.27.2 macOS arm64; remote success/failure evidence remains outstanding.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
   - task_id: T030
     status: blocked
@@ -344,7 +344,7 @@ validation:
   warnings:
     - Native macOS amd64/Linux and Go 1.24 matrix unverified.
   blocking_issues:
-    - T027 requires a configured workflow and verified remote success/failure evidence.
+    - T027 workflow is implemented; verified remote success/failure evidence remains outstanding.
     - T030 distribution remains gated on CI and explicit publication approval.
     - T035 drafts prepared but release prerequisite T030 remains blocked.
     - T032 local signing tools prepared; actual release signing requires T030 and approved key trust.

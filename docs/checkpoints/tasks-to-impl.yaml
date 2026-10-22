@@ -302,7 +302,7 @@ blocked_tasks:
     status: blocked
     reason: Workflow implemented; verified successful/intentional failing remote runs remain outstanding.
     local_implementation: [.github/workflows/ci.yml, scripts/ci.sh, Makefile, docs/ci.md]
-    verification: actionlint v1.7.7 and all workflow make targets passed locally on Go 1.27.2 macOS arm64; remote success/failure evidence remains outstanding.
+    verification: Hosted run 39752877495 passed both Linux jobs; macOS exposed a bounded-lock test assumption. Corrected test passed 50 local race-enabled repetitions and make ci. Full hosted success and deliberate failure verification remain outstanding.
     upstream_trace: {plan_item: Release foundations, requirements: [REQ-010]}
   - task_id: T030
     status: blocked
@@ -342,7 +342,7 @@ validation:
   passed: true
   errors: []
   warnings:
-    - Native macOS amd64/Linux and Go 1.24 matrix unverified.
+    - Linux Go 1.24/stable jobs passed; corrected macOS job and remaining native architectures await hosted verification.
   blocking_issues:
     - T027 workflow is implemented; verified remote success/failure evidence remains outstanding.
     - T030 distribution remains gated on CI and explicit publication approval.

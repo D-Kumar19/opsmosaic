@@ -1,3 +1,21 @@
+hosted_ci_bookmark_test_fix:
+  date: "2026-10-22"
+  task: T027
+  requirement: REQ-010
+  hosted_run: "39752877495"
+  hosted_results:
+    linux_go_1_24: passed
+    linux_go_stable: passed
+    macos_go_stable: failed_bookmark_concurrency_test
+  cause: Test assumed every concurrent writer succeeds within the production 250ms lock wait; explicit contention rejection is valid.
+  fix: Verify all accepted edits persist, resubmit busy-rejected edits after concurrent writers finish, assert exact bookmark identities and held-lock error.
+  production_behavior_changed: false
+  validation:
+    race_enabled_regression_repetitions: 50
+    regression_failures: 0
+    make_ci: passed
+    core_coverage_percentage: 87.7
+  remaining_gate: Push fix and verify complete hosted matrix success; intentional negative remote check remains outstanding.
 github_actions_setup:
   batch_id: B16
   date: "2026-10-22"

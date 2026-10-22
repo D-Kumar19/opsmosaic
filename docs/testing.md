@@ -19,6 +19,15 @@ Only macOS arm64 execution was verified; other targets were cross-built.
 Go 1.24 and the remote Go/OS matrix remain unverified pending tooling/runners.
 See [CI readiness](ci.md); do not interpret local success as remote CI.
 
+Hosted run 39752877495 subsequently passed Linux Go 1.24.x/stable. Its macOS
+failure revealed an invalid timing assumption in the concurrent bookmark test:
+contenders may legitimately receive `errStateBusy` after the bounded wait.
+The corrected test checks retention of every successful write, resubmits
+explicitly rejected writes after contention ends, verifies all expected bookmark
+identities, and requires a held lock to report `errStateBusy`. It passed 50
+race-enabled local repetitions and the full local CI entry point. A fully green
+hosted matrix is still required; production lock timeouts were not increased.
+
 Phase 4 adds `make test-demo` (five Python standard-library cases) and
 `make demo` (macOS-only media generation). The recorder tests prompt/reply
 handling, command failures, missing prompts, timeouts and output validation.

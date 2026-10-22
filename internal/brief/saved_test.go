@@ -3,6 +3,7 @@ package brief
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -137,27 +138,66 @@ func TestSavedMissingCorruptAndArguments(t *testing.T) {
 
 func TestSavedConcurrentEditsAndBusyReplay(t *testing.T) {
 	a := newTestApp(t)
-	runApp(a, []string{"--tips", "--count", "3"}, "Alex\n1,2,3\n")
+	if _, _, err := runApp(a, []string{"--tips", "--count", "3"}, "Alex\n1,2,3\n"); err != nil {
+		t.Fatal(err)
+	}
 	var wg sync.WaitGroup
-	failures := make(chan error, 3)
+	type result struct {
+		number int
+		err    error
+	}
+	results := make(chan result, 3)
+	start := make(chan struct{})
 	for i := 1; i <= 3; i++ {
 		wg.Add(1)
 		go func(number int) {
 			defer wg.Done()
+			<-start
 			_, _, err := runApp(a, []string{"bookmarks", "add", fmt.Sprint(number)}, "")
-			failures <- err
+			results <- result{number, err}
 		}(i)
 	}
+	close(start)
 	wg.Wait()
-	close(failures)
-	for err := range failures {
-		if err != nil {
+	close(results)
+	var busy []int
+	for result := range results {
+		if errors.Is(result.err, errStateBusy) {
+			busy = append(busy, result.number)
+		} else if result.err != nil {
+			t.Fatal(result.err)
+		}
+	}
+	state, err := a.Store.saved()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(state.Bookmarks) != 3-len(busy) {
+		t.Fatal("successful concurrent bookmark update lost")
+	}
+	// The bounded lock may reject contention; retry rejected edits after writers finish.
+	for _, number := range busy {
+		if _, _, err := runApp(a, []string{"bookmarks", "add", fmt.Sprint(number)}, ""); err != nil {
 			t.Fatal(err)
 		}
 	}
-	state, _ := a.Store.saved()
+	state, err = a.Store.saved()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(state.Bookmarks) != 3 {
 		t.Fatal("concurrent bookmark update lost")
+	}
+	for _, item := range state.Last.Items {
+		found := false
+		for _, bookmark := range state.Bookmarks {
+			if bookmark.ID == bookmarkID(item) {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("bookmark missing for item %s", item.ID)
+		}
 	}
 	lock, err := a.Store.lock(context.Background(), time.Second)
 	if err != nil {
@@ -165,8 +205,8 @@ func TestSavedConcurrentEditsAndBusyReplay(t *testing.T) {
 	}
 	defer lock.Close()
 	before, _ := os.ReadFile(a.Store.savedPath())
-	if _, _, err := runApp(a, []string{"bookmarks", "remove", state.Bookmarks[0].ID}, ""); err == nil {
-		t.Fatal("busy bookmark mutation succeeded")
+	if _, _, err := runApp(a, []string{"bookmarks", "remove", state.Bookmarks[0].ID}, ""); !errors.Is(err, errStateBusy) {
+		t.Fatalf("busy bookmark mutation must report state contention: %v", err)
 	}
 	if _, _, err := runApp(a, []string{"replay"}, ""); err != nil {
 		t.Fatal("read-only replay unnecessarily acquired lock")

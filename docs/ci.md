@@ -6,7 +6,16 @@ Repository: [D-Kumar19/opsmosaic](https://github.com/D-Kumar19/opsmosaic).
 Local entry point: `make ci`. The [workflow](../.github/workflows/ci.yml) runs
 on pushes to `main`, pull requests targeting `main`, and manual dispatch.
 Actions is enabled according to the maintainer. No secrets or write token
-permissions are required. Remote CI success has not yet been verified.
+permissions are required.
+
+The [first hosted run](https://github.com/D-Kumar19/opsmosaic/actions/runs/39752877495)
+passed both Linux jobs (Go 1.24.x and stable). The macOS stable job exposed a
+bookmark-concurrency test that incorrectly required all contenders to acquire
+the bounded lock within 250 ms. The test now accepts explicit busy rejections,
+verifies successful writes are retained, and resubmits rejected writes only
+after all concurrent writers finish. Production locking behavior is unchanged.
+The corrected test passed 50 local race-enabled repetitions and `make ci`;
+a successful complete hosted matrix remains outstanding.
 
 ## Configured matrix
 

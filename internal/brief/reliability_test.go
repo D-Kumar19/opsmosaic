@@ -240,9 +240,11 @@ func TestStateProcessHelper(t *testing.T) {
 	}
 	if os.Getenv("OPSMOSAIC_TEST_APP") == "1" {
 		a := &App{Store: store, Now: time.Now}
-		if _, _, err := runApp(a, []string{"--tips"}, ""); err != nil {
+		_, warnings, err := runApp(a, []string{"--tips"}, "")
+		if err != nil {
 			t.Fatal(err)
 		}
+		fmt.Print(warnings)
 		return
 	}
 	ctx := context.Background()
@@ -288,14 +290,18 @@ func TestConcurrentCLIProcesses(t *testing.T) {
 		}
 		commands, outputs = append(commands, cmd), append(outputs, &output)
 	}
+	var readOnly uint64
 	for i, cmd := range commands {
 		if err := cmd.Wait(); err != nil {
 			t.Fatalf("CLI subprocess: %v %s", err, outputs[i].String())
 		}
+		if strings.Contains(outputs[i].String(), "Warning: state is busy; showing a read-only snapshot") {
+			readOnly++
+		}
 	}
 	got, err := a.Store.cache()
-	if err != nil || got.GreetingVisits != 4 {
-		t.Fatalf("CLI lost state updates: %+v %v", got, err)
+	if err != nil || got.GreetingVisits != 4-readOnly || readOnly == 4 {
+		t.Fatalf("CLI lost writable state updates: %+v %v; read-only subprocesses=%d", got, err, readOnly)
 	}
 }
 

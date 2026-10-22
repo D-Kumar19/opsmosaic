@@ -1,3 +1,10 @@
+hosted_process_concurrency_test_fix:
+  date: "2026-10-22"
+  hosted_run: "39754875425"
+  cause: Process concurrency test counted warned read-only snapshots as writable runs.
+  fix: Expose helper warnings and compare persisted greeting increments with writable subprocess count; require at least one write.
+  production_behavior_changed: false
+  validation: {race_enabled_repetitions: 20, failures: 0, make_ci: passed}
 ci_completion_and_backlog_cleanup:
   date: "2026-10-22"
   completed_tasks: [T027]

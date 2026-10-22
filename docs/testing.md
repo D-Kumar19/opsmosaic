@@ -28,6 +28,13 @@ identities, and requires a held lock to report `errStateBusy`. It passed 50
 race-enabled local repetitions and the full local CI entry point. A fully green
 hosted matrix is still required; production lock timeouts were not increased.
 
+The later run 39754875425 exposed the same invalid assumption in
+`TestConcurrentCLIProcesses` on Go 1.24/Linux. The subprocess helper now exposes
+busy warnings, and the test requires exactly one persisted greeting update per
+writable subprocess while allowing explicitly warned read-only snapshots.
+At least one subprocess must persist its update. Twenty race-enabled local
+repetitions and full local CI passed; production behavior is unchanged.
+
 Phase 4 adds `make test-demo` (five Python standard-library cases) and
 `make demo` (macOS-only media generation). The recorder tests prompt/reply
 handling, command failures, missing prompts, timeouts and output validation.
